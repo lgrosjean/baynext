@@ -1,4 +1,10 @@
 terraform {
+
+  backend "gcs" {
+    bucket = "tf-state-lgrosjean"
+    prefix = "terraform/baynext/state"
+  }
+
   required_providers {
     google = {
       source  = "hashicorp/google"
