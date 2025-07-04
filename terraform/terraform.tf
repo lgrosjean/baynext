@@ -1,7 +1,7 @@
 terraform {
 
   backend "gcs" {
-    bucket = var.backend_bucket
+    bucket = "tf-state-lgrosjean"
     prefix = "terraform/baynext/state"
   }
 

@@ -33,7 +33,7 @@ jobs:
       run: terraform init
 
     - name: Plan
-      run: terraform plan -out ${{ env.TFPLAN_FILE }} -var="project_id=${{ env.GCP_PROJECT }}" -var="backend_bucket=${{ vars.TF_BACKEND_BUCKET }}"
+      run: terraform plan -out ${{ env.TFPLAN_FILE }} -var="project_id=${{ env.GCP_PROJECT }}"
       
     - name: Apply
       run: terraform apply -input=false -auto-approve ${{ env.TFPLAN_FILE }}

@@ -44,7 +44,7 @@ jobs:
   
         - name: Plan
           working-directory: ${{ env.TF_DIR }}
-          run: terraform plan -out ${{ env.TFPLAN_FILE }} -var="project_id=${{ env.GCP_PROJECT }}" -var="backend_bucket=${{ vars.TF_BACKEND_BUCKET }}"
+          run: terraform plan -out ${{ env.TFPLAN_FILE }} -var="project_id=${{ env.GCP_PROJECT }}"
 
         - name: Comment
           uses: borchero/terraform-plan-comment@v2
