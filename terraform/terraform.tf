@@ -1,4 +1,10 @@
 terraform {
+
+  backend "gcs" {
+    bucket = var.backend_bucket
+    prefix = "terraform/baynext/state"
+  }
+
   required_providers {
     google = {
       source  = "hashicorp/google"

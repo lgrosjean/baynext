@@ -31,6 +31,8 @@ jobs:
 
         - name: Setup terraform
           uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: ${{ env.TF_VERSION }}
     
         - name: Init
           working-directory: ${{ env.TF_DIR }}
@@ -42,7 +44,7 @@ jobs:
   
         - name: Plan
           working-directory: ${{ env.TF_DIR }}
-          run: terraform plan -out ${{ env.TFPLAN_FILE }} -var="project_id=${{ env.GCP_PROJECT }}"
+          run: terraform plan -out ${{ env.TFPLAN_FILE }} -var="project_id=${{ env.GCP_PROJECT }}" -var="backend_bucket=${{ vars.TF_BACKEND_BUCKET }}"
 
         - name: Comment
           uses: borchero/terraform-plan-comment@v2
