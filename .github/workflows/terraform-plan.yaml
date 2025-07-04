@@ -3,8 +3,6 @@ name: "Terraform Plan"
 
 on:
   pull_request:
-    paths:
-      - 'terraform/**'
 
 env:
   TF_DIR: terraform
