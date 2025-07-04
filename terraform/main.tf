@@ -24,20 +24,18 @@ resource "google_artifact_registry_repository" "docker_repo" {
   location      = local.location
   repository_id = local.repository_id
   format        = "DOCKER"
-}
 
-resource "google_artifact_registry_repository_cleanup_policy" "keep_last_2_tags" {
-  project    = var.project_id
-  location   = local.location
-  repository = google_artifact_registry_repository.docker_repo.name
+  cleanup_policies {
+    id     = "keep-last-2"
+    action = "DELETE"
 
-  policy_id = "keep-last-2"
-  action    = "DELETE"
+    condition {
+      tag_state  = "TAGGED"
+      newer_than = "0s" # required
+    }
 
-  condition {
-    tag_state            = "TAGGED"
-    newer_than           = "0s" # required
-    package_name         = ".*"
-    most_recent_versions = 2
+    most_recent_versions {
+      keep_count = 2
+    }
   }
 }
