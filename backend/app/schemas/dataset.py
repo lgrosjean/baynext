@@ -2,10 +2,14 @@
 
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import HttpUrl
 from sqlmodel import ARRAY, JSON, AutoString, Field, Relationship, SQLModel, String
+
+if TYPE_CHECKING:
+    from .pipeline import Pipeline  # Avoid circular import
+    from .project import Project  # Avoid circular import
 
 
 class Dataset(SQLModel, table=True):

@@ -12,3 +12,7 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
             src: "./backend"
+            
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+            dockerfile: backend/Dockerfile
