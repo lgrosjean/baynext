@@ -1,0 +1,10 @@
+# Terraform files and directories
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+.terraform.lock.hcl
+.terraformrc
+terraform.rc
+
+key.json
