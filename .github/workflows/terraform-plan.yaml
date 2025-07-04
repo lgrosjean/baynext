@@ -59,7 +59,7 @@ jobs:
 
         - name: Save Artifact
           id: save-artifact
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             path: ${{ env.TF_DIR }}/tfplan
 
