@@ -49,4 +49,4 @@ jobs:
           run: terraform plan -no-color -var="project_id=${{ env.GCP_PROJECT }}"
 
         - name: Terraform Apply
-          run: terraform apply -input=false -auto-approve
+          run: terraform apply -input=false -auto-approve -var="project_id=${{ env.GCP_PROJECT }}"
