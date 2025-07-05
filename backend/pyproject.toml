@@ -20,7 +20,13 @@ dev = [
     "pytest>=8.3.5",
     "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.1.1",
+    "pytest-env>=1.1.5",
 ]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "session"
+env = [
+    "ML_API_SECRET_API_KEY=ml_api_secret_api_key",
+    "DATABASE_URL=postgresql//user:password@host:port/dbname",
+    "BLOB_READ_WRITE_TOKEN=blob_read_write_token",
+]
