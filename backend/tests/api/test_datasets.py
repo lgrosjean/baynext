@@ -76,7 +76,6 @@ async def test_list_datasets_success(
     mock_session,
     expected_datasets,
 ):
-
     # Arrange
     mock_service_instance = mock_dataset_service.return_value
     mock_service_instance.list.return_value = expected_datasets

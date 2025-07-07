@@ -7,6 +7,5 @@ class ModelBase(BaseModel):
 
 
 class ModelPublic(ModelBase):
-
     uri: str
     deployed: bool

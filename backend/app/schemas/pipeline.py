@@ -32,7 +32,5 @@ class Pipeline(SQLModel, table=True):
     jobs: Optional[list["Job"]] = Relationship(back_populates="pipeline")
 
     @field_validator("model_spec")
-    def val_model_spec(
-        cls, val
-    ):  # pylint: disable=no-self-argument,missing-function-docstring
+    def val_model_spec(cls, val):
         return val.dict()

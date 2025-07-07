@@ -18,7 +18,6 @@ logger = get_logger(__name__)
 
 
 def task(job_id: str, session: Session):
-
     job: Job = session.get(Job, job_id)
 
     if job is None:
@@ -48,7 +47,6 @@ def task(job_id: str, session: Session):
 
         # Step 1: Load the dataset
         with get(dataset.file_url) as file_path:
-
             input_data = load(
                 csv_path=file_path,
                 kpi_type=dataset.kpi_type,

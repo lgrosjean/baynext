@@ -13,13 +13,11 @@ from app.validations.enums import JobStatus
 from app.validations.job_parameters import JobParams
 
 if TYPE_CHECKING:
-
     from .model import Model
     from .pipeline import Pipeline
 
 
 class Job(SQLModel, table=True):
-
     __tablename__ = "jobs"
 
     # Attributes
