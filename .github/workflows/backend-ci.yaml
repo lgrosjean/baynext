@@ -1,0 +1,46 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: astral-sh/ruff-action@v3
+              with:
+                src: "./backend"
+            
+            - uses: astral-sh/ruff-action@v3
+              with:
+                src: "./backend"
+                
+            - run: ruff check app tests
+            - run: ruff format app tests --check
+
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v5
+
+            - name: Install the project
+              run: uv sync --locked --all-extras --dev
+
+            - name: Run tests
+              run: uv run pytest tests --cov=app
+
+    dockerfile:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: hadolint/hadolint-action@v3.1.0
+              with:
+                dockerfile: backend/Dockerfile

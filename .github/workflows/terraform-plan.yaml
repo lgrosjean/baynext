@@ -3,6 +3,8 @@ name: "Terraform Plan"
 
 on:
   pull_request:
+    paths:
+      - 'terraform/**'
 
 defaults:
   run:

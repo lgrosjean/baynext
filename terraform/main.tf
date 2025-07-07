@@ -6,6 +6,7 @@ locals {
     "cloudresourcemanager.googleapis.com"
   ]
   repository_id = "baynext-docker-repo"
+  location      = "europe-west1"
 }
 
 # Activate APIs for the project
@@ -20,7 +21,21 @@ resource "google_project_service" "services" {
 resource "google_artifact_registry_repository" "docker_repo" {
   depends_on    = [google_project_service.services]
   project       = var.project_id
-  location      = "europe-west1"
+  location      = local.location
   repository_id = local.repository_id
   format        = "DOCKER"
+
+  cleanup_policies {
+    id     = "keep-last-2"
+    action = "DELETE"
+
+    condition {
+      tag_state  = "TAGGED"
+      newer_than = "0s" # required
+    }
+
+    most_recent_versions {
+      keep_count = 2
+    }
+  }
 }
