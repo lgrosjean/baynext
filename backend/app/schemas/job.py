@@ -41,7 +41,5 @@ class Job(SQLModel, table=True):
     model: "Model" = Relationship(back_populates="job")
 
     @field_validator("params")
-    def val_model_spec(
-        cls, val
-    ):  # pylint: disable=no-self-argument,missing-function-docstring
+    def val_model_spec(cls, val):  # pylint: disable=C0116,E0213
         return val.dict()
