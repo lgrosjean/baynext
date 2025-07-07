@@ -1,7 +1,7 @@
 [project]
 name = "baynext-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "Baynext API for managing datasets, jobs, and pipelines"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -23,10 +23,13 @@ dev = [
     "pytest-env>=1.1.5",
 ]
 
+[tool.ruff.lint.isort]
+known-local-folder = ["app", "tests"]
+
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "session"
 env = [
     "ML_API_SECRET_API_KEY=ml_api_secret_api_key",
-    "DATABASE_URL=postgresql//user:password@host:port/dbname",
+    "DATABASE_URL=postgresql://user:password@host:80/dbname",
     "BLOB_READ_WRITE_TOKEN=blob_read_write_token",
 ]

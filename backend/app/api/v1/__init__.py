@@ -2,20 +2,23 @@
 
 from fastapi import APIRouter, Security
 
+from app.api.v1 import datasets, jobs, pipelines
 from app.core.security import check_token
 
-from . import datasets, jobs, pipelines
-
 router = APIRouter(
-    prefix="/v1/projects/{project_id}",
+    prefix="/v1",
+)
+
+project_router = APIRouter(
+    prefix="/projects/{project_id}",
     dependencies=[
         Security(check_token),
     ],
 )
 
-router.include_router(pipelines.router)
-router.include_router(datasets.router)
-router.include_router(jobs.router)
+project_router.include_router(pipelines.router)
+project_router.include_router(datasets.router)
+project_router.include_router(jobs.router)
 
 
 @router.get("/health", include_in_schema=False)
@@ -24,3 +27,6 @@ async def health_check():
     Health check endpoint.
     """
     return {"status": "ok"}
+
+
+router.include_router(project_router)

@@ -7,9 +7,11 @@ from app.core.settings import settings
 
 
 @pytest.mark.asyncio
-async def test_check_token_valid():
+async def test_check_token_valid(monkeypatch):
     # Mock the secret API key
-    settings.ml_api_secret_api_key.get_secret_value = lambda: "valid_api_key"
+    monkeypatch.setattr(
+        settings.ml_api_secret_api_key, "get_secret_value", lambda: "valid_api_key"
+    )
 
     # Create a mock HTTPAuthorizationCredentials object with a valid token
     credentials = HTTPAuthorizationCredentials(
@@ -24,9 +26,11 @@ async def test_check_token_valid():
 
 
 @pytest.mark.asyncio
-async def test_check_token_invalid():
+async def test_check_token_invalid(monkeypatch):
     # Mock the secret API key
-    settings.ml_api_secret_api_key.get_secret_value = lambda: "valid_api_key"
+    monkeypatch.setattr(
+        settings.ml_api_secret_api_key, "get_secret_value", lambda: "valid_api_key"
+    )
 
     # Create a mock HTTPAuthorizationCredentials object with an invalid token
     credentials = HTTPAuthorizationCredentials(
