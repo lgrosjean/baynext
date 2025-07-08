@@ -29,11 +29,6 @@ resource "google_artifact_registry_repository" "docker_repo" {
     id     = "keep-last-2"
     action = "DELETE"
 
-    condition {
-      tag_state  = "TAGGED"
-      newer_than = "0s" # required
-    }
-
     most_recent_versions {
       keep_count = 2
     }
