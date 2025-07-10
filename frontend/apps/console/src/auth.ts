@@ -3,10 +3,7 @@
 
 import NextAuth, { type DefaultSession } from "next-auth"
 import GitHub from "next-auth/providers/github"
-import { DrizzleAdapter } from "@auth/drizzle-adapter"
-import Credentials from "next-auth/providers/credentials"
-import { db } from "@workspace/db/client";
-import { users } from "@workspace/db/schema"
+import * as jose from 'jose'
 
 // See: https://authjs.dev/getting-started/typescript
 declare module "next-auth" {
@@ -14,6 +11,7 @@ declare module "next-auth" {
    * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
   interface Session {
+    token: string // Added to include token in the session
     user: {
       /** The user's id. */
       id: string
@@ -24,64 +22,45 @@ declare module "next-auth" {
        * you need to add them back into the newly declared interface.
        */
     } & DefaultSession["user"]
+    // token?: string // Add this line to include token in the session
   }
 }
  
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   pages: {
     signIn: "/login",
-    // signOut: "/auth/signout",
-    // error: "/auth/error", // Error code passed in query string as ?error=
   },
-  adapter: DrizzleAdapter(db),
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
-    Credentials({
-        // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-        // e.g. domain, username, password, 2FA token, etc.
-        credentials: {
-          email: {},
-          password: {},
-        },
-        authorize: async (credentials) => {
-          let user = null
-   
-          // logic to salt and hash password
-          const pwHash = saltAndHashPassword(credentials.password)
-   
-          // logic to verify if the user exists
-          user = await getUserFromDb(credentials.email, pwHash)
-   
-          if (!user) {
-            // No user found, so this is their first attempt to login
-            // Optionally, this is also the place you could do a user registration
-            throw new Error("Invalid credentials.")
-          }
-   
-          // return user object with their profile data
-          return user
-        },
-      })
     ],
+    // https://authjs.dev/reference/nextjs#callbacks
     callbacks: {
       //  By default, the `id` property does not exist on `token` or `session`. See the [TypeScript](https://authjs.dev/getting-started/typescript) on how to add it.
-      jwt({ token, user, account, profile }) {
+      async jwt({ token, user, account }) {
         if (user) { // User is available during sign-in
           token.id = user.id
         }
-        // if (profile) {
-        //   token.accessToken = profile.access_token
-        //   token.id = profile.id
-        // }
         return token
       },
       // https://authjs.dev/guides/extending-the-session#with-jwt
-      session({ session, token, user }) {
-        session.user.id = token.id as string
+      // This callback is called whenever a session is checked.
+      async session({ session, token, user }) {
+        if (token) {
+          session.user.id = token.id as string
+          
+          if (!process.env.AUTH_SECRET) throw new Error('JWT secret not found')
+          const secret = jose.base64url.decode(process.env.AUTH_SECRET)
+          session.token = await new jose.SignJWT(token)
+            .setProtectedHeader({ alg: 'HS256' })
+            .sign(secret)
+        }
         return session
       },
       authorized({ auth, request: { nextUrl } }) {
