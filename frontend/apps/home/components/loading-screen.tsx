@@ -27,7 +27,9 @@ export function LoadingScreen({ onLoadingComplete }: LoadingScreenProps) {
     const updateProgress = () => {
       if (currentStep < loadingSteps.length) {
         const step = loadingSteps[currentStep]
-        setLoadingText(step.text)
+        if (step) {
+          setLoadingText(step.text)
+        }
 
         const stepProgress = 100 / loadingSteps.length
         const targetProgress = (currentStep + 1) * stepProgress
