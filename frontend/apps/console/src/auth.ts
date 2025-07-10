@@ -12,17 +12,18 @@ declare module "next-auth" {
    */
   interface Session {
     token: string // Added to include token in the session
-    user: {
-      /** The user's id. */
-      id: string
-      /**
-       * By default, TypeScript merges new interface properties and overwrites existing ones.
-       * In this case, the default session user properties will be overwritten,
-       * with the new ones defined above. To keep the default session user properties,
-       * you need to add them back into the newly declared interface.
-       */
-    } & DefaultSession["user"]
-    // token?: string // Add this line to include token in the session
+    // https://next-auth.js.org/getting-started/typescript#extend-default-interface-properties
+    // user: {
+    //   /** The user's id. */
+    //   id: string
+    //   /**
+    //    * By default, TypeScript merges new interface properties and overwrites existing ones.
+    //    * In this case, the default session user properties will be overwritten,
+    //    * with the new ones defined above. To keep the default session user properties,
+    //    * you need to add them back into the newly declared interface.
+    //    */
+    // } & DefaultSession["user"]
+    // // token?: string // Add this line to include token in the session
   }
 }
  

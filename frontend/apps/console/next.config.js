@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    authInterrupts: true,
+  },
   redirects: async () => [
     {
       source: '/',
@@ -12,6 +15,6 @@ const nextConfig = {
       permanent: false,
     },
     ],
-  };
+};
 
 export default nextConfig;

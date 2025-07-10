@@ -4,7 +4,9 @@ import {
     AvatarImage,
   } from "@workspace/ui/components/avatar"
 
-export const UserAvatar = ({user}:{user: { name: string, image: string}}) => {
+import { User } from "next-auth"
+
+export const UserAvatar = ({ user }: { user: User }) => {
 
   const initials = user.name
     ?.split(' ')

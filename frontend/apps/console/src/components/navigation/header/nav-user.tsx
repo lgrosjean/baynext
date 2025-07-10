@@ -20,6 +20,8 @@ import { UserAvatar } from "./user-avatar"
 
 import { signOut } from "@/auth"
 
+import { User } from "next-auth"
+
 const menuItems = [
   {
     title: "Account",
@@ -38,7 +40,7 @@ const menuItems = [
   },
 ]
 
-export function NavUser({ user }: { user: { name: string; email: string, image: string } }) {
+export function NavUser({ user }: { user: User}) {
 
   return (
     <DropdownMenu>

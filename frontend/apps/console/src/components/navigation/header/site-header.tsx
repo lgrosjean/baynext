@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 
+import { unauthorized } from "next/navigation"
 
 import { NavProjects } from "./nav-project-breadcrumb"
 import { NavUser } from "./nav-user"
@@ -7,6 +8,12 @@ import { NavUser } from "./nav-user"
 export async function SiteHeader() {
 
     const user = (await auth())?.user
+
+    if (!user) {
+        // If the user is not authenticated, redirect to the login page
+        // https://nextjs.org/docs/app/api-reference/functions/unauthorized
+        unauthorized()
+    }
 
     const project = {
         team: {
