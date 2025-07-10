@@ -1,26 +1,22 @@
+import type { Metadata } from 'next'
+
 import "@workspace/ui/globals.css"
-import { Toaster } from "@workspace/ui/components/sonner"
+import '@/styles/globals.css'
 
-import type { Metadata } from "next";
-
-import { GeistSans } from 'geist/font/sans';
 
 export const metadata: Metadata = {
-  title: "Baynext",
-  description: "Marketing Modeling Platform powered by OSS & Cloud",
-};
+  title: 'Baynext',
+  description: 'Baynext is a next-generation platform for building, training and analyzing MMM models with ease.',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={GeistSans.className}>
-      <body className="bg-tertiary">
-        {children}
-        <Toaster position="bottom-right" richColors />
-      </body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
-  );
+  )
 }
