@@ -174,15 +174,17 @@ function FileField({ form, setColumns }: { form: any, setColumns: (columns: stri
             <Input {...fieldProps} type="file" placeholder="A short description of your project" accept="text/csv"
               onChange={(event) => {
                 onChange(event.target.files && event.target.files[0])
-                event.target.files && Papa.parse(event.target.files[0], {
-                  header: true,
-                  complete: function (results) {
-                    if (results.meta.fields) {
-                      results.meta.fields = results.meta.fields?.map(field => field === "" ? "<empty>" : field);
-                      setColumns(results.meta["fields"])
+                if (event.target.files && event.target.files[0]) {
+                  Papa.parse(event.target.files[0], {
+                    header: true,
+                    complete: function (results) {
+                      if (results.meta.fields) {
+                        results.meta.fields = results.meta.fields?.map(field => field === "" ? "<empty>" : field);
+                        setColumns(results.meta["fields"])
+                      }
                     }
-                  }
-                });
+                  });
+                }
               }}
             />
           </FormControl>
@@ -605,20 +607,25 @@ function MappingColsField({ form, columns }: { form: any, columns: string[] }) {
                 value={mapping.channelName} 
                 onChange={(e) => {
                   const newMapping = [...columnMappings]
-                  newMapping[index].channelName = e.target.value
-                  setColumnMappings(newMapping)
+                  if (newMapping[index]) {
+                    newMapping[index].channelName = e.target.value
+                    setColumnMappings(newMapping)
+                  }
+                  
                 }} />
               </TableCell>
               <TableCell>
                 <Select
                   onValueChange={(value) => {
                     const newMapping = [...columnMappings];
-                    newMapping[index].mediaColumn = value;
-                    setColumnMappings(newMapping);
-                    form.setValue("mediaToChannel", {
-                      ...form.getValues("mediaToChannel"),
-                      [value]: columnMappings[index].channelName,
-                    });
+                    if (newMapping[index]) {
+                      newMapping[index].mediaColumn = value;
+                      setColumnMappings(newMapping);
+                      form.setValue("mediaToChannel", {
+                        ...form.getValues("mediaToChannel"),
+                        [value]: newMapping[index].channelName,
+                      });
+                    }
                   }}
                   value={mapping.mediaColumn}
                   disabled={columns.length === 0}
@@ -639,12 +646,14 @@ function MappingColsField({ form, columns }: { form: any, columns: string[] }) {
                 <Select
                   onValueChange={(value) => {
                     const newMapping = [...columnMappings];
-                    newMapping[index].mediaSpendColumn = value;
-                    setColumnMappings(newMapping);
-                    form.setValue("mediaSpendToChannel", {
-                      ...form.getValues("mediaSpendToChannel"),
-                      [value]: columnMappings[index].channelName,
-                    });
+                    if (newMapping[index]) {
+                      newMapping[index].mediaSpendColumn = value;
+                      setColumnMappings(newMapping);
+                      form.setValue("mediaSpendToChannel", {
+                        ...form.getValues("mediaSpendToChannel"),
+                        [value]: newMapping[index].channelName,
+                      });
+                    }
                   }}
                   value={mapping.mediaSpendColumn}
                   disabled={columns.length === 0}
