@@ -43,7 +43,7 @@ export function DeleteDatasetMenuItem({ dataset }: { dataset: Dataset}) {
     const [open, setOpen] = useState(false);
 
     const DeleteDatasetSchema = z.object({
-        name: z.literal(dataset.fileName, {
+        name: z.literal(dataset.name, {
                 message: "Name must match the dataset's name",
             })
     })
@@ -96,7 +96,7 @@ export function DeleteDatasetMenuItem({ dataset }: { dataset: Dataset}) {
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder={dataset.fileName} {...field} />
+                                        <Input placeholder={dataset.name} {...field} />
                                     </FormControl>
                                     <FormDescription>
                                         The dataset to delete's name.
