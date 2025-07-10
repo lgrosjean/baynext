@@ -10,6 +10,8 @@ dependencies = [
     "google-meridian>=1.0.8",
     "psycopg2-binary>=2.9.10",
     "pydantic-settings>=2.9.0",
+    "pyjwt>=2.10.1",
+    "python-jose[cryptography]>=3.5.0",
     "python-multipart>=0.0.20",
     "requests>=2.32.3",
     "sqlmodel>=0.0.24",
@@ -32,4 +34,5 @@ env = [
     "ML_API_SECRET_API_KEY=ml_api_secret_api_key",
     "DATABASE_URL=postgresql://user:password@host:80/dbname",
     "BLOB_READ_WRITE_TOKEN=blob_read_write_token",
+    "AUTH_SECRET=auth_secret",
 ]

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ml_api_secret_api_key: SecretStr
     database_url: SecretStr
     blob_read_write_token: SecretStr
+    auth_secret: SecretStr
 
     model_config = SettingsConfigDict(env_file=".env")
 
