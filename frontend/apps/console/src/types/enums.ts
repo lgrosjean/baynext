@@ -1,6 +1,6 @@
 export enum KpiType {
     Revenue = "revenue",
-    NonRevenue = "non-revenue",
+    NonRevenue = "non_revenue",
 }
 
 export enum JobStatus {
