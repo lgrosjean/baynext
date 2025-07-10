@@ -143,8 +143,7 @@ export default function LandingPage() {
               icon={<Shield className="w-6 h-6 text-white" />}
               title="Enterprise Security"
               description="Designed with security in mind, featuring modern authentication and access controls"
-              orde
-              rColor="border-blue-500/20"
+              borderColor="border-blue-500/20"
               iconGradient="from-blue-500 to-blue-600"
               shadowColor="hover:shadow-blue-500/10"
               delay={500}
