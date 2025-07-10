@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import * as schema from "@workspace/drizzle/schema";
+import * as schema from "@workspace/db/schema";
 
 // Create the Neon HTTP client using your DATABASE_URL
 const sql = neon(process.env.DATABASE_URL!);
