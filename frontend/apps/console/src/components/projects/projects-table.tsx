@@ -5,22 +5,13 @@ import { useRouter } from 'next/navigation'
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@workspace/ui/components/table"
 
-
-type Project = {
-    id: string
-    userId: string
-    name: string
-    description?: string
-    createdAt: Date
-    updatedAt?: Date
-}
+import { Project } from '@/types/projects'
 
 export const ProjectsTable = ({ projects }: { projects: Project[] }) => {
     const router = useRouter()
