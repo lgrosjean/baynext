@@ -1,14 +1,11 @@
 'use server';
 
 import { db } from '@workspace/db/client';
-import { redis } from '@/lib/redis';
 import { auth } from '@/auth';
 import { projects} from '@workspace/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation'
-
-const STATUS_KEY = (projectId: string) => `project:${projectId}:status`;
 
 // ----------------------
 // Create a new project
@@ -42,8 +39,6 @@ export async function createProject({
 
   // Optional: revalidate overview path
   revalidatePath('/app/projects');
-
-  // await redis.set(STATUS_KEY(projectCreated.id), projectStatus.EMPTY);
 
   redirect(`/app/projects/${projectCreated.id}`);
 }
@@ -100,7 +95,6 @@ export async function deleteProjectById(projectId: string) {
   }
 
   await db.delete(projects).where(eq(projects.id, projectId));
-  await redis.del(STATUS_KEY(projectId));
 
   revalidatePath('/app/projects');
   redirect('/app/projects');

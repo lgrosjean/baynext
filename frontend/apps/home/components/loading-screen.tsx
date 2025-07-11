@@ -12,15 +12,15 @@ export function LoadingScreen({ onLoadingComplete }: LoadingScreenProps) {
   const [loadingText, setLoadingText] = useState("Initializing")
   const [isExiting, setIsExiting] = useState(false)
 
-  const loadingSteps = [
-    { text: "Initializing", duration: 800 },
-    { text: "Loading MMM Engine", duration: 600 },
-    { text: "Connecting Analytics", duration: 500 },
-    { text: "Preparing Dashboard", duration: 400 },
-    { text: "Almost Ready", duration: 300 },
-  ]
-
   useEffect(() => {
+    const loadingSteps = [
+      { text: "Initializing", duration: 800 },
+      { text: "Loading MMM Engine", duration: 600 },
+      { text: "Connecting Analytics", duration: 500 },
+      { text: "Preparing Dashboard", duration: 400 },
+      { text: "Almost Ready", duration: 300 },
+    ]
+
     let currentStep = 0
     let currentProgress = 0
 

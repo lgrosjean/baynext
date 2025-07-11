@@ -8,7 +8,6 @@
     "check-types": "tsc --noEmit"
   },
   "exports": {
-    ".": "./src/db.ts",
     "./schema": "./src/schema.ts",
     "./client": "./drizzle.server.ts"
   },

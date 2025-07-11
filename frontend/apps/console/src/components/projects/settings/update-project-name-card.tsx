@@ -45,9 +45,9 @@ export function UpdateProjectCard({ project }: { project: {
         <Card className="shadow-none">
 
             <CardHeader>
-                <CardTitle>Update project's name</CardTitle>
+                <CardTitle>Update project&apos;s name</CardTitle>
                 <CardDescription>
-                    This action will update the project's name.
+                    This action will update the project&apos;s name.
                 </CardDescription>
             </CardHeader>
 

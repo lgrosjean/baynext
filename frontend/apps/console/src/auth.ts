@@ -1,7 +1,7 @@
 
 // https://dev.to/jamescroissant/user-authentication-with-authjs-in-nextjs-app-router-424k
 
-import NextAuth, { type DefaultSession,  NextAuthResult } from "next-auth"
+import NextAuth, { type NextAuthResult } from "next-auth"
 import GitHub from "next-auth/providers/github"
 import * as jose from 'jose'
 
@@ -37,14 +37,14 @@ const authOptions = NextAuth({
   },
   providers: [
     GitHub({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
     }),
   ],
   // https://authjs.dev/reference/nextjs#callbacks
   callbacks: {
     //  By default, the `id` property does not exist on `token` or `session`. See the [TypeScript](https://authjs.dev/getting-started/typescript) on how to add it.
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) { // User is available during sign-in
         token.id = user.id
       }
@@ -52,7 +52,7 @@ const authOptions = NextAuth({
     },
     // https://authjs.dev/guides/extending-the-session#with-jwt
     // This callback is called whenever a session is checked.
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string
         

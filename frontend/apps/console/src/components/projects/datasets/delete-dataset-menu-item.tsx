@@ -82,7 +82,7 @@ export function DeleteDatasetMenuItem({ dataset }: { dataset: Dataset}) {
                 <DialogHeader>
                     <DialogTitle>Delete the dataset</DialogTitle>
                     <DialogDescription>
-                        Confirm the deletion by giving the dataset's name.
+                        Confirm the deletion by giving the dataset&apos;s name.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -99,7 +99,7 @@ export function DeleteDatasetMenuItem({ dataset }: { dataset: Dataset}) {
                                         <Input placeholder={dataset.name} {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        The dataset to delete's name.
+                                        The dataset to delete&apos;s name.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

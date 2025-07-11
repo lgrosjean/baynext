@@ -18,7 +18,7 @@ export async function POST(
       body,
       request,
       onBeforeGenerateToken: async (
-        pathname,
+        // pathname,
         /* clientPayload */
       ) => {
         // Generate a client token for the browser to upload the file
@@ -47,7 +47,7 @@ export async function POST(
           console.log('blob url', blob.url);
           // await db.update({ avatar: blob.url, userId });
         } catch (error) {
-          throw new Error('Could not update user');
+          throw new Error(`Could not update user. ${(error as Error).message}`);
         }
       },
     });

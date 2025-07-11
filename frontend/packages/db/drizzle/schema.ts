@@ -1,5 +1,4 @@
 import { pgTable, varchar, timestamp, foreignKey, text, jsonb, integer, unique, json, boolean, pgEnum } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
 
 export const jobStatus = pgEnum("job_status", ['pending', 'running', 'completed', 'failed'])
 export const kpiType = pgEnum("kpi_type", ['revenue', 'non-revenue'])

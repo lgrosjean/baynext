@@ -1,7 +1,6 @@
 import { pgTable, text, timestamp, boolean} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-import { projects } from "./projects";
 import { jobs } from "./jobs";
 
 export const models = pgTable("models", {
@@ -16,7 +15,7 @@ export const models = pgTable("models", {
   // updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const modelsRelations = relations(models, ({ one, many }) => ({
+export const modelsRelations = relations(models, ({ one }) => ({
   // project: one(projects, { fields: [models.projectId], references: [projects.id] }),
   job: one(jobs, { fields: [models.jobId], references: [jobs.id] }),
   // versions: many(modelVersions),

@@ -2,7 +2,6 @@ import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { users } from "./auth";
 import { datasets } from "./datasets";
-import { models } from "./models";
 import { pipelines } from "./pipelines";
 
 export const projects = pgTable("projects", {

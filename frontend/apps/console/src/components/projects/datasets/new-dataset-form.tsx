@@ -46,6 +46,7 @@ import { useForm } from "react-hook-form"
 import { Trash } from "lucide-react";
 
 import { newDatasetSchema, NewDataset } from "@/validations/datasets";
+import { UseFormReturn } from "react-hook-form";
 
 
 export function NewDatasetForm({ projectId }: { projectId: string }) {
@@ -140,24 +141,25 @@ export function NewDatasetForm({ projectId }: { projectId: string }) {
   )
 }
 
-function DatasetNameField({ form }: { form: any }) {
-  return (<FormField
-    control={form.control}
-    name="name"
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Dataset Name</FormLabel>
-        <FormControl>
-          <Input placeholder="shadcn" {...field} />
-        </FormControl>
-        <FormDescription>
-          The name of your dataset. This will be used to identify your dataset in the project.
-        </FormDescription>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  )
+function DatasetNameField({ form }: { form: UseFormReturn<NewDataset> }) {
+  return (
+    <FormField
+      control={form.control}
+      name="name"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Dataset Name</FormLabel>
+          <FormControl>
+            <Input placeholder="shadcn" {...field} />
+          </FormControl>
+          <FormDescription>
+            The name of your dataset. This will be used to identify your dataset in the project.
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 }
 
 function FileField({ form, setColumns }: { form: any, setColumns: (columns: string[]) => void }) {

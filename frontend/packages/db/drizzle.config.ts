@@ -1,8 +1,8 @@
 // File: drizzle.config.ts
 import { defineConfig } from 'drizzle-kit';
 
-const url =
-  process.env.NODE_ENV === 'production' ? process.env.POSTGRES_URL : process.env.LOCAL_POSTGRES_URL;
+const url = process.env.DATABASE_URL
+  // process.env.NODE_ENV === 'production' ? process.env.POSTGRES_URL : process.env.LOCAL_POSTGRES_URL;
 
 if (!url)
   throw new Error(
