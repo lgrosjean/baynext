@@ -27,7 +27,7 @@ resource "google_artifact_registry_repository" "docker_repo" {
 
   cleanup_policies {
     id     = "keep-last-2"
-    action = "DELETE"
+    action = "KEEP"
 
     most_recent_versions {
       keep_count = 2
