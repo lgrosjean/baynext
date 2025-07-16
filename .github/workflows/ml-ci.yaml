@@ -59,8 +59,8 @@ jobs:
               with:
                 context: ./ml
                 push: true
-                cache-from: type=gha
-                cache-to: type=gha,mode=max
+                # cache-from: type=gha
+                # cache-to: type=gha,mode=max
                 tags: |
                     ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
                     ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
