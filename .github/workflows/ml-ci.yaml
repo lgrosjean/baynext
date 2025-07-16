@@ -55,6 +55,7 @@ jobs:
               uses: google-github-actions/auth@v2
               with:
                 credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+                token_format: access_token
 
             - name: Docker Auth
               id: docker-auth
