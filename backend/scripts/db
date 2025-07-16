@@ -1,0 +1,13 @@
+#!/bin/bash
+"""
+Convenience script to run database operations with uv.
+
+Usage:
+    ./scripts/db seed              # Seed the database
+    ./scripts/db seed --clear      # Clear and then seed
+    ./scripts/db clear             # Clear seed data
+    ./scripts/db reset             # Reset (clear + seed)
+"""
+
+cd "$(dirname "$0")/.." || exit 1
+exec uv run python scripts/cli.py "$@"
