@@ -1,4 +1,3 @@
-import meridian
 from training.main import main
 from utils.enums import KPIType
 
