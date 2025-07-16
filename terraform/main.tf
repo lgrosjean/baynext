@@ -34,3 +34,17 @@ resource "google_artifact_registry_repository" "docker_repo" {
     }
   }
 }
+
+resource "google_cloud_run_v2_job" "baynext_ml_job" {
+  name     = "baynext-ml-job"
+  location = local.location
+  project  = var.project_id
+
+  template {
+    template {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/placeholder"
+      }
+    }
+  }
+}
