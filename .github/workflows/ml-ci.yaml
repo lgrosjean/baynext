@@ -11,6 +11,7 @@ defaults:
 
 env:
     SERVICE_NAME: baynext-ml
+    REGION: europe-west1
     ARTIFACT_REGISTRY: europe-west1-docker.pkg.dev/baynext-x1307/baynext-docker-repo
 
 jobs:
@@ -48,11 +49,21 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - id: auth
+            
+            - id: gcp-auth
               name: Authenticate to Google Cloud with OIDC
               uses: google-github-actions/auth@v2
               with:
                 credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+
+            - name: Docker Auth
+              id: docker-auth
+              uses: 'docker/login-action@v3'
+              with:
+                username: 'oauth2accesstoken'
+                password: '${{ steps.gcp-auth.outputs.access_token }}'
+                registry: '${{ env.REGION }}-docker.pkg.dev'
+
             - id: build
               name: Build, tag and push container
               uses: docker/build-push-action@v6
