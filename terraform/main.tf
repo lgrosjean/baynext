@@ -34,3 +34,38 @@ resource "google_artifact_registry_repository" "docker_repo" {
     }
   }
 }
+
+# Create a service account for the Cloud Run job
+resource "google_service_account" "cloud_run_job_sa" {
+  account_id   = "baynext-ml-job-sa"
+  display_name = "Service Account for Baynext ML Job"
+  project      = var.project_id
+}
+
+# Grant the service account permissions to run jobs and access Artifact Registry
+resource "google_project_iam_member" "cloud_run_job_sa_artifact_registry_reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = google_service_account.cloud_run_job_sa.member
+}
+
+resource "google_project_iam_member" "cloud_run_job_sa_run_invoker" {
+  project = var.project_id
+  role    = "roles/run.invoker"
+  member  = google_service_account.cloud_run_job_sa.member
+}
+
+resource "google_cloud_run_v2_job" "baynext_ml_job" {
+  name     = "baynext-ml-job"
+  location = local.location
+  project  = var.project_id
+
+  template {
+    template {
+      service_account = google_service_account.cloud_run_job_sa.email
+      containers {
+        image = "${local.location}-docker.pkg.dev/${var.project_id}/${local.repository_id}/baynext-ml:latest"
+      }
+    }
+  }
+}

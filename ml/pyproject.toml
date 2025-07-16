@@ -1,0 +1,26 @@
+[project]
+name = "baynext-ml"
+version = "0.1.0"
+description = "Baynext ML Training"
+authors = [
+    { name = "Léo Grosjean", email = "leo.grosjean@live.fr" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-meridian>=1.1.4",
+    "typer>=0.16.0",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "training",
+    "utils",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-mock>=3.14.1",
+]
