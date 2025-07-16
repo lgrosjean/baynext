@@ -46,13 +46,13 @@ resource "google_service_account" "cloud_run_job_sa" {
 resource "google_project_iam_member" "cloud_run_job_sa_artifact_registry_reader" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
-  member  = "serviceAccount:${google_service_account.cloud_run_job_sa.email}"
+  member  = google_service_account.cloud_run_job_sa.member
 }
 
 resource "google_project_iam_member" "cloud_run_job_sa_run_invoker" {
   project = var.project_id
   role    = "roles/run.invoker"
-  member  = "serviceAccount:${google_service_account.cloud_run_job_sa.email}"
+  member  = google_service_account.cloud_run_job_sa.member
 }
 
 resource "google_cloud_run_v2_job" "baynext_ml_job" {
