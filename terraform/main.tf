@@ -64,7 +64,7 @@ resource "google_cloud_run_v2_job" "baynext_ml_job" {
     template {
       service_account = google_service_account.cloud_run_job_sa.email
       containers {
-        image = "us-docker.pkg.dev/cloudrun/container/placeholder"
+        image = "${local.location}-docker.pkg.dev/${var.project_id}/${local.repository_id}/baynext-ml:latest"
       }
     }
   }
