@@ -3,9 +3,7 @@ from sqlmodel import Session, select
 
 
 class BaseService:
-    """
-    Base service class for managing database operations.
-    """
+    """Base service class for managing database operations."""
 
     def __init__(self, session: Session, project_id: str):
         self.session = session
@@ -18,9 +16,8 @@ class BaseService:
         cls.model_class = model_class
 
     def create(self, model: type[BaseModel]):
-        """
-        Create a new record in the database.
-        """
+        """Create a new record in the database."""
+
         db_model = self.model_class.model_validate(model)
         self.session.add(db_model)
         self.session.commit()

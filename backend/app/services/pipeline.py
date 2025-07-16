@@ -1,5 +1,3 @@
-# app/services/pipeline_service.py
-
 from ..schemas.pipeline import Pipeline
 from ..validations.pipeline import PipelineCreate
 from .base import BaseService
