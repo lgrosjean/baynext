@@ -6,10 +6,12 @@ on:
             - main
         paths:
             - 'ml/**'
-            - './github/workflows/ml-cd.yaml'
+            - '.github/workflows/ml-cd.yaml'
 
 env:
-    SERVICE_NAME: baynext-ml
+    IMAGE_NAME: baynext-ml
+    JOB_NAME: baynext-ml-job
+    REGION: europe-west1
     ARTIFACT_REGISTRY: europe-west1-docker.pkg.dev/baynext-x1307/baynext-docker-repo
 
 jobs:
@@ -31,5 +33,6 @@ jobs:
             - id: 'deploy'
               uses: 'google-github-actions/deploy-cloudrun@v2'
               with:
-                service: ${{ env.SERVICE_NAME }}
-                image: ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
+                job: ${{ env.JOB_NAME }}
+                image: ${{ env.ARTIFACT_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+                region: ${{ env.REGION }}

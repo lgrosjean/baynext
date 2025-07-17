@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'ml/**'
-      - './github/workflows/ml-ci.yaml'
+      - '.github/workflows/ml-ci.yaml'
 
 defaults:
   run:
