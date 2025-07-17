@@ -2,7 +2,10 @@ from sqlmodel import Session, create_engine
 
 from .settings import settings
 
-engine = create_engine(settings.database_url.get_secret_value(), echo=True)
+engine = create_engine(
+    settings.database_url.get_secret_value().replace("postgres://", "postgresql://"),
+    echo=True,
+)
 
 
 def get_session():

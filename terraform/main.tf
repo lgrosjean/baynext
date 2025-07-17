@@ -114,10 +114,33 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
     service_account = google_service_account.cloud_run_backend_sa.email
     containers {
       image = data.google_artifact_registry_docker_image.backend_image.self_link
+
+      env {
+        name  = "DATABASE_URL"
+        value = replace(neon_project.baynext_project.connection_uri, "postgres://", "postgresql://")
+      }
+
+      env {
+        name  = "AUTH_SECRET"
+        value = var.auth_secret
+      }
+
+      env {
+        name  = "BLOB_READ_WRITE_TOKEN"
+        value = var.blob_read_write_token
+      }
+
+      env {
+        name  = "ML_API_SECRET_API_KEY"
+        value = var.ml_api_secret_api_key
+      }
+
       ports {
         container_port = 80
       }
     }
   }
+
+
 
 }

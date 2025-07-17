@@ -11,7 +11,13 @@ on:
 defaults:
   run:
     working-directory: terraform
-      
+
+env:
+  NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+  TF_VAR_auth_secret: ${{ secrets.AUTH_SECRET }}
+  TF_VAR_blob_read_write_token: ${{ secrets.VERCEL_TOKEN }}
+  TF_VAR_ml_api_secret_api_key: ${{ secrets.ML_API_SECRET_API_KEY }}
+
 permissions:
   id-token: write
   contents: read

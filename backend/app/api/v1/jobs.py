@@ -7,7 +7,6 @@ from sqlmodel import Session
 
 from app.core.db import get_session
 from app.services import JobService
-from app.tasks import train
 from app.validations.job import JobCreate, JobCreated, JobStatus
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
@@ -31,8 +30,7 @@ async def create_job(
     job = service.create(job_data)
 
     # ✅ Launch background training
-    background_tasks.add_task(train.task, job_id=job.id, session=session)
-    # run_training_job(job_id=new_job.id, session=session)
+    # TODO
 
     return job
 
