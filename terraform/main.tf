@@ -130,6 +130,11 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
         value = var.blob_read_write_token
       }
 
+      env {
+        name  = "ML_API_SECRET_API_KEY"
+        value = var.ml_api_secret_api_key
+      }
+
       ports {
         container_port = 80
       }

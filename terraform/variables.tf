@@ -14,3 +14,9 @@ variable "blob_read_write_token" {
   type        = string
   sensitive   = true
 }
+
+variable "ml_api_secret_api_key" {
+  description = "API key for ML API"
+  type        = string
+  sensitive   = true
+}
