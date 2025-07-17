@@ -10,9 +10,16 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 6.0"
     }
+
+    neon = {
+      source  = "kislerdm/neon"
+    }
   }
 }
 
 provider "google" {
   project = var.project_id
 }
+
+# NEON_API_KEY is set in the environment
+provider "neon" {}
