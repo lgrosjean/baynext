@@ -7,7 +7,6 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.15.2",
     "fastapi[standard]>=0.115.12",
-    "google-meridian>=1.0.8",
     "psycopg2-binary>=2.9.10",
     "pydantic-settings>=2.9.0",
     "pyjwt>=2.10.1",
