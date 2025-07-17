@@ -12,7 +12,7 @@ terraform {
     }
 
     neon = {
-      source  = "kislerdm/neon"
+      source = "kislerdm/neon"
     }
   }
 }

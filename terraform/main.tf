@@ -121,12 +121,12 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
       }
 
       env {
-        name = "AUTH_SECRET"
+        name  = "AUTH_SECRET"
         value = var.auth_secret
       }
 
       env {
-        name = "BLOB_READ_WRITE_TOKEN"
+        name  = "BLOB_READ_WRITE_TOKEN"
         value = var.blob_read_write_token
       }
 
