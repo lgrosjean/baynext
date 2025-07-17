@@ -55,7 +55,7 @@ resource "google_project_iam_member" "cloud_run_job_sa_artifact_registry_reader"
 
 resource "google_project_iam_member" "cloud_run_job_sa_run_invoker" {
   project = var.project_id
-  role    = "roles/run.invoker"
+  role    = "roles/run.jobsExecutorWithOverrides"
   member  = google_service_account.cloud_run_job_sa.member
 }
 
@@ -94,7 +94,7 @@ resource "google_project_iam_member" "cloud_run_backend_sa_artifact_registry_rea
 
 resource "google_project_iam_member" "cloud_run_backend_sa_run_invoker" {
   project = var.project_id
-  role    = "roles/run.invoker"
+  role    = "roles/run.servicesInvoker"
   member  = google_service_account.cloud_run_backend_sa.member
 }
 
@@ -115,7 +115,7 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
     containers {
       image = data.google_artifact_registry_docker_image.backend_image.self_link
       ports {
-        container_port = 8080
+        container_port = 80
       }
     }
   }
