@@ -35,6 +35,10 @@ resource "google_artifact_registry_repository" "docker_repo" {
   }
 }
 
+############################
+# The following resources are for the Cloud Run ML job
+############################
+
 # Create a service account for the Cloud Run job
 resource "google_service_account" "cloud_run_job_sa" {
   account_id   = "baynext-ml-job-sa"
@@ -68,4 +72,52 @@ resource "google_cloud_run_v2_job" "baynext_ml_job" {
       }
     }
   }
+}
+
+##########################
+# The following resources are for the Cloud Run backend service
+##########################
+
+# Create a service account for the Cloud Run backend service
+resource "google_service_account" "cloud_run_backend_sa" {
+  account_id   = "baynext-backend-sa"
+  display_name = "Service Account for Baynext Backend"
+  project      = var.project_id
+}
+
+# Grant the service account permissions to access Artifact Registry and invoke Cloud Run services
+resource "google_project_iam_member" "cloud_run_backend_sa_artifact_registry_reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = google_service_account.cloud_run_backend_sa.member
+}
+
+resource "google_project_iam_member" "cloud_run_backend_sa_run_invoker" {
+  project = var.project_id
+  role    = "roles/run.invoker"
+  member  = google_service_account.cloud_run_backend_sa.member
+}
+
+data "google_artifact_registry_docker_image" "backend_image" {
+  location      = google_artifact_registry_repository.docker_repo.location
+  repository_id = google_artifact_registry_repository.docker_repo.repository_id
+  image_name    = "baynext-backend:latest"
+}
+
+# Create a Cloud Run service for the backend
+resource "google_cloud_run_v2_service" "baynext_backend_service" {
+  name     = "baynext-backend-service"
+  location = local.location
+  project  = var.project_id
+
+  template {
+    service_account = google_service_account.cloud_run_backend_sa.email
+    containers {
+      image = data.google_artifact_registry_docker_image.backend_image.self_link
+      ports {
+        container_port = 8080
+      }
+    }
+  }
+
 }
