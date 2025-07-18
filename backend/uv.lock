@@ -56,6 +56,7 @@ dependencies = [
     { name = "python-multipart" },
     { name = "requests" },
     { name = "sqlmodel" },
+    { name = "typer" },
 ]
 
 [package.dev-dependencies]
@@ -77,6 +78,7 @@ requires-dist = [
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "sqlmodel", specifier = ">=0.0.24" },
+    { name = "typer", specifier = ">=0.13.1" },
 ]
 
 [package.metadata.requires-dev]
