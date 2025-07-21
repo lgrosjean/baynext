@@ -1,19 +1,47 @@
-from ..schemas.pipeline import Pipeline
-from ..validations.pipeline import PipelineCreate
-from .base import BaseService
+"""Pipeline service module for handling pipeline-related operations."""
+
+from sqlmodel import Session, select
+
+from app.schemas.pipeline import Pipeline, PipelineCreate
 
 
-class PipelineService(BaseService, model_class=Pipeline):
-    """
-    Service class for managing pipelines.
-    """
+class PipelineService:
+    """Service class for managing pipeline CRUD operations."""
 
-    def create(self, model: PipelineCreate) -> Pipeline:
-        """Create a new pipeline"""
+    def __init__(self, session: Session, project_id: str) -> None:
+        """Initialize the pipeline service with a database session.
 
-        return super().create(
-            {
-                "project_id": self.project_id,
-                **model.model_dump(mode="json", exclude_none=True),
-            }
-        )
+        Args:
+            session: SQLModel database session for operations
+            project_id: The ID of the project to which pipelines belong
+
+        """
+        self.session = session
+        self.project_id = project_id
+
+    def create_pipeline(self, pipeline: PipelineCreate) -> Pipeline:
+        """Create a new pipeline.
+
+        Args:
+            pipeline: The data for the new pipeline
+
+        Returns:
+            The created pipeline
+
+        """
+        pipeline_db = Pipeline.model_validate(pipeline)
+        self.session.add(pipeline_db)
+        self.session.commit()
+        self.session.refresh(pipeline_db)
+        # TODO(@lgrosjean): create job immediately
+        return pipeline_db
+
+    def list_pipelines(self) -> list[Pipeline]:
+        """List all pipelines for the project.
+
+        Returns:
+            A list of pipelines
+
+        """
+        query = select(Pipeline).where(Pipeline.project_id == self.project_id)
+        return self.session.exec(query).all()

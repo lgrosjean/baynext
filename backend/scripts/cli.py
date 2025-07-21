@@ -20,6 +20,7 @@ from app.core.db import engine  # noqa: E402
 # Import all models to ensure they're registered with SQLModel
 from app.schemas.dataset import Dataset  # noqa: E402, F401
 from app.schemas.job import Job  # noqa: E402, F401
+from app.schemas.key import Key  # noqa: E402, F401
 from app.schemas.model import Model  # noqa: E402, F401
 from app.schemas.pipeline import Pipeline  # noqa: E402, F401
 from app.schemas.project import Project  # noqa: E402, F401

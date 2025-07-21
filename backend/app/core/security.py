@@ -1,90 +1,109 @@
+"""Security module for handling authentication and authorization in the application."""
+
 import os
-from base64 import b64decode
-from typing import Annotated
+from datetime import UTC, datetime, timedelta
 
 import jwt
-from fastapi import HTTPException, Security, status
-from fastapi.security import (
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-)
-from pydantic import BaseModel, EmailStr
+from fastapi import HTTPException, status
+from passlib.context import CryptContext
 
-from app.core.settings import settings
-from app.core.exceptions import UnauthoriedError, AuthError
+from app.core.exceptions import MissingAuthSecretError
+from app.schemas.user import User
 
+ALGORITHM = "HS256"
 
-# JWT configuration
-JWT_SECRET = os.getenv("AUTH_SECRET")
-if not JWT_SECRET:
-    raise ValueError("AUTH_SECRET environment variable is required")
+MISSING_USER_ID_MESSAGE = "User ID not found in token"
+MISSING_EMAIL_MESSAGE = "Email not found in token"
 
-ALGORITHM = "HS256"  # Adjust if you use a different algorithm
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class User(BaseModel):
-    id: str
-    email: EmailStr
-    name: str
+def get_jwt_secret() -> str:
+    """Retrieve the JWT secret from environment variables.
+
+    This function checks for the `AUTH_SECRET` environment variable,
+    which is used to sign and verify JWT tokens. If the variable is not set,
+    it raises a `MissingAuthSecretError`.
+
+    Returns:
+        str: The JWT secret key.
+
+    Raises:
+        MissingAuthSecretError: If the `AUTH_SECRET` environment variable is not set.
+
+    """
+    jwt_secret = os.getenv("AUTH_SECRET")
+    if not jwt_secret:
+        raise MissingAuthSecretError
+    return jwt_secret
 
 
-async def check_token(
-    credentials: Annotated[
-        HTTPAuthorizationCredentials,
-        Security(
-            HTTPBearer(
-                description="Bearer token for API access",
-            )
-        ),
-    ],
-) -> None:
-    if credentials.credentials != settings.ml_api_secret_api_key.get_secret_value():
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid API key",
-        )
+def get_password_hash(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return pwd_context.hash(password)
 
 
-def get_current_user(
-    credentials: Annotated[
-        HTTPAuthorizationCredentials,
-        Security(
-            HTTPBearer(
-                description="Bearer token for API access",
-            )
-        ),
-    ],
-) -> User:
-    """Get the current user from the JWT token from the request headers."""
-    if not credentials:
-        raise AuthError("No credentials provided")
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain password against a hashed password."""
+    return pwd_context.verify(plain_password, hashed_password)
 
-    token = credentials.credentials
+
+def create_jwt_token(data: dict, expiration: int | None = None) -> str:
+    """Create a JWT token with the given data and optional expiration time.
+
+    Args:
+        data (dict): The payload data to include in the token.
+        expiration (int | None): Optional expiration time in seconds.
+        If None, the token does not expire.
+
+    Returns:
+        str: The encoded JWT token.
+
+    """
+    jwt_secret = get_jwt_secret()
+    if expiration:
+        data["exp"] = datetime.now(UTC) + timedelta(seconds=expiration)
+    return jwt.encode(data, jwt_secret, algorithm=ALGORITHM)
+
+
+def decode_jwt_token(token: str) -> dict:
+    """Decode a JWT token and return the payload.
+
+    Args:
+        token (str): The JWT token to decode.
+
+    Returns:
+        dict: The decoded payload data.
+
+    Raises:
+        HTTPException: If the token is invalid or expired.
+
+    """
+    jwt_secret = get_jwt_secret()
     try:
-        payload = jwt.decode(
-            token,
-            b64decode(JWT_SECRET),
-            algorithms=[ALGORITHM],
-        )
-        user_id = payload.get("sub")
-        email = payload.get("email")
-        name = payload.get("name")
-
-        if not user_id:
-            raise UnauthoriedError("User ID not found in token")
-
-        if not email:
-            raise UnauthoriedError("Email not found in token")
-
-        user = User(
-            id=user_id,
-            email=email,
-            name=name or "",
-        )
-        return user
-
+        return jwt.decode(token, jwt_secret, algorithms=[ALGORITHM])
     except jwt.PyJWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid token",
+            detail="Invalid or expired token",
         ) from exc
+
+
+def create_user_jwt_token(user: User, expiration: int | None = None) -> str:
+    """Create a JWT token for the user.
+
+    Args:
+        user (User): The user for whom the token is created.
+        expiration (int | None): Optional expiration time in seconds.
+        If None, the token does not expire.
+
+    Returns:
+        str: The encoded JWT token.
+
+    """
+    data = {
+        "sub": user.id,
+        "email": user.email,
+        "name": user.name or "",
+    }
+    return create_jwt_token(data, expiration=expiration)

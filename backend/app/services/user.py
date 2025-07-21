@@ -2,6 +2,7 @@
 
 from sqlmodel import Session, select
 
+from app.core.security import verify_password
 from app.schemas.user import User, UserCreate, UserPublic, UserUpdate
 
 
@@ -50,6 +51,36 @@ class UserService:
 
         """
         return self.session.get(User, user_id)
+
+    def get_by_email(self, email: str) -> User | None:
+        """Retrieve a user by their email address.
+
+        Args:
+            email: The email address of the user
+
+        Returns:
+            User if found, None otherwise
+
+        """
+        statement = select(User).where(User.email == email)
+        return self.session.exec(statement).first()
+
+    def authenticate_user(self, email: str, password: str) -> User | None:
+        """Authenticate a user by email and password.
+
+        Args:
+            email: The user's email address
+            password: The user's password
+
+        Returns:
+            User if authentication is successful, None otherwise
+
+        """
+        user = self.get_by_email(email)
+
+        if user and verify_password(password, user.password):
+            return user
+        return None
 
     def get_public(self, user_id: str) -> UserPublic | None:
         """Get a user's public information by ID.

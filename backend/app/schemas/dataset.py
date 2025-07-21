@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import HttpUrl, ValidationInfo, field_validator
+from pydantic import BaseModel, HttpUrl, ValidationInfo, field_validator
 from sqlmodel import (
     ARRAY,
     JSON,
@@ -22,10 +22,7 @@ if TYPE_CHECKING:
     from .pipeline import Pipeline
     from .project import Project
 
-
-# Error messages as constants
-DATASET_NAME_EMPTY_ERROR = "Dataset name cannot be empty"
-INVALID_MEDIA_MAPPING_ERROR = "Media to channel mapping is invalid"
+_PREFIX = "ds_"
 
 
 class DatasetBase(SQLModel):
@@ -292,11 +289,21 @@ class DatasetUpdate(SQLModel):
         return v.strip() if v else None
 
 
-class DatasetPublic(DatasetBase):
+class DatasetPublic(BaseModel):
     """Public dataset model for API responses."""
 
-    id: str
-    project_id: str
+    id: str = Field(
+        description="Unique dataset identifier",
+        schema_extra={
+            "examples": ["dataset-123"],
+        },
+    )
+    project_id: str = Field(
+        description="Parent project ID",
+        schema_extra={
+            "examples": ["proj-123"],
+        },
+    )
     file_url: HttpUrl
     uploaded_at: datetime
 

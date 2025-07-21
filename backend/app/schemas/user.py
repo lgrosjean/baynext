@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import VARCHAR, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .project import Project
@@ -29,6 +29,7 @@ class User(UserBase, table=True):
         alias="emailVerified",
         sa_column_kwargs={"name": "emailVerified"},
     )
+    password: str = Field(sa_column=VARCHAR(length=255))
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships

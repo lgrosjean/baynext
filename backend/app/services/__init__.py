@@ -1,9 +1,10 @@
-from ..schemas import Dataset, Model
+from ..schemas import Model
 from .base import make_service
-from .job import JobService
+from .dataset import DatasetService
 from .pipeline import PipelineService
+from .project import ProjectService
+from .user import UserService
 
-DatasetService = make_service(Dataset)
 ModelService = make_service(Model)
 
 __all__ = [
@@ -11,4 +12,6 @@ __all__ = [
     "JobService",
     "ModelService",
     "PipelineService",
+    "ProjectService",
+    "UserService",
 ]

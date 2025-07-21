@@ -6,8 +6,10 @@ from datetime import UTC, datetime, timedelta
 import sqlalchemy
 from sqlmodel import Session, select, text
 
+from app.core.security import get_password_hash
 from app.schemas.dataset import Dataset, KpiType
 from app.schemas.job import Job
+from app.schemas.key import Key
 from app.schemas.model import Model
 from app.schemas.pipeline import Pipeline
 from app.schemas.project import Project
@@ -23,24 +25,28 @@ users = [
         id="user-001",
         name="John Doe",
         email="john.doe@example.com",
+        password=get_password_hash("password_1"),
         image="https://avatars.githubusercontent.com/u/1234567?v=4",
     ),
     User(
         id="user-002",
         name="Jane Smith",
         email="jane.smith@example.com",
+        password=get_password_hash("password_2"),
         image="https://avatars.githubusercontent.com/u/2345678?v=4",
     ),
     User(
         id="user-003",
         name="Mike Johnson",
         email="mike.johnson@example.com",
+        password=get_password_hash("password_3"),
         image="https://avatars.githubusercontent.com/u/3456789?v=4",
     ),
     User(
         id="user-004",
         name="Sarah Wilson",
         email="sarah.wilson@example.com",
+        password=get_password_hash("password_4"),
         image="https://avatars.githubusercontent.com/u/4567890?v=4",
     ),
 ]
@@ -192,7 +198,7 @@ def create_sample_pipelines(
     sample_pipelines = [
         Pipeline(
             id="pipe-001",
-            project_id=created_projects[0].id,  # E-commerce MMM Campaign
+            project_id=created_projects[0].id,
             dataset_id=created_datasets[0].id,  # Q3 Media Performance Data
             model_spec=ModelSpec(
                 max_lag=7,
@@ -203,7 +209,7 @@ def create_sample_pipelines(
         ),
         Pipeline(
             id="pipe-002",
-            project_id=created_projects[0].id,  # E-commerce MMM Campaign
+            project_id=created_projects[0].id,
             dataset_id=created_datasets[1].id,  # Historical Sales Data
             model_spec=ModelSpec(
                 max_lag=10,
@@ -214,7 +220,7 @@ def create_sample_pipelines(
         ),
         Pipeline(
             id="pipe-003",
-            project_id=created_projects[1].id,  # Brand Awareness Study
+            project_id=created_projects[1].id,
             dataset_id=created_datasets[2].id,  # Brand Tracking Survey
             model_spec=ModelSpec(
                 max_lag=5,
@@ -356,6 +362,84 @@ def create_sample_models(
     return sample_models
 
 
+def create_sample_api_keys(
+    session: Session,
+    created_projects: list[Project],
+) -> list[Key]:
+    """Create sample API keys for development."""
+    # Generate some sample API keys for different projects
+    sample_keys = []
+
+    sample_keys.extend(
+        [
+            Key(
+                project_id=created_projects[0].id,
+                description="Production API key for automated reporting",
+                expires_at=datetime.now(UTC) + timedelta(days=90),
+                is_active=True,
+                created_at=datetime.now(UTC) - timedelta(days=30),
+                updated_at=datetime.now(UTC) - timedelta(days=30),
+            ),
+            Key(
+                project_id=created_projects[0].id,
+                description="Development testing key",
+                expires_at=datetime.now(UTC) + timedelta(days=30),
+                is_active=True,
+                created_at=datetime.now(UTC) - timedelta(days=15),
+                updated_at=datetime.now(UTC) - timedelta(days=15),
+            ),
+            Key(
+                project_id=created_projects[0].id,
+                description="CI/CD pipeline integration",
+                expires_at=datetime.now(UTC) + timedelta(days=60),
+                is_active=True,
+                created_at=datetime.now(UTC) - timedelta(days=7),
+                updated_at=datetime.now(UTC) - timedelta(days=7),
+            ),
+            Key(
+                project_id=created_projects[1].id,
+                description="Brand tracking data collection",
+                expires_at=datetime.now(UTC) + timedelta(days=120),
+                is_active=True,
+                created_at=datetime.now(UTC) - timedelta(days=20),
+                updated_at=datetime.now(UTC) - timedelta(days=20),
+            ),
+            Key(
+                project_id=created_projects[1].id,
+                description="Expired test key (demonstration)",
+                expires_at=datetime.now(UTC) - timedelta(days=5),  # Expired
+                is_active=False,  # Deactivated
+                created_at=datetime.now(UTC) - timedelta(days=45),
+                updated_at=datetime.now(UTC) - timedelta(days=6),
+            ),
+            Key(
+                project_id=created_projects[2].id,
+                description="Holiday campaign analytics",
+                expires_at=None,  # Never expires
+                last_used_at=None,  # Never used yet
+                is_active=True,
+                created_at=datetime.now(UTC) - timedelta(days=3),
+                updated_at=datetime.now(UTC) - timedelta(days=3),
+            ),
+        ],
+    )
+
+    for key in sample_keys:
+        # Check if key already exists
+        existing = session.get(Key, key.id)
+        if not existing:
+            session.add(key)
+
+    session.commit()
+
+    # Log the actual API keys for development purposes
+    logger.info("🔑 Generated API Keys (for development only):")
+    for key in sample_keys:
+        logger.info("  %s (%s...): %s", key.id, key.description[:30], key.key)
+
+    return sample_keys
+
+
 def seed_database(session: Session) -> None:
     """Seed the database with sample data."""
     logger.info("🌱 Starting database seeding...")
@@ -392,6 +476,11 @@ def seed_database(session: Session) -> None:
     created_models = create_sample_models(session, created_jobs)
     logger.info("✅ Created %d models", len(created_models))
 
+    # Create API keys
+    logger.info("🔑 Creating sample API keys...")
+    created_keys = create_sample_api_keys(session, created_projects)
+    logger.info("✅ Created %d API keys", len(created_keys))
+
     logger.info("🎉 Database seeding completed!")
 
 
@@ -405,7 +494,7 @@ def clear_seed_data(session: Session) -> None:
     try:
         session.exec(
             text(
-                'TRUNCATE TABLE jobs, pipelines, datasets, projects, "user" '
+                'TRUNCATE TABLE models, jobs, pipelines, datasets, api_key, projects, "user" '
                 "RESTART IDENTITY CASCADE",
             ),
         )
@@ -417,7 +506,11 @@ def clear_seed_data(session: Session) -> None:
 
         # Fallback to individual deletion if TRUNCATE fails
 
-        # Delete in dependency order: jobs -> pipelines -> datasets -> projects -> users
+        # Delete in dependency order: models -> jobs -> pipelines -> datasets -> api_keys -> projects -> users
+        models = session.exec(select(Model)).all()
+        for model in models:
+            session.delete(model)
+
         jobs = session.exec(select(Job)).all()
         for job in jobs:
             session.delete(job)
@@ -429,6 +522,10 @@ def clear_seed_data(session: Session) -> None:
         datasets = session.exec(select(Dataset)).all()
         for dataset in datasets:
             session.delete(dataset)
+
+        api_keys = session.exec(select(Key)).all()
+        for api_key in api_keys:
+            session.delete(api_key)
 
         projects = session.exec(select(Project)).all()
         for project in projects:
