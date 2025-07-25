@@ -33,25 +33,41 @@ def _ask_username_and_password() -> tuple[str, str]:
 
 
 @app.command()
-def login() -> None:
+def login(
+    username: str = typer.Option(
+        None,
+        "--username",
+        "-u",
+        help="Email or username for login. If not provided, will prompt.",
+    ),
+    password: str = typer.Option(
+        None,
+        "--password",
+        "-p",
+        help="Password for login. If not provided, will prompt.",
+    ),
+) -> None:
     """🔓 Login to your account and get an access token."""
-    existing_email = get_config_value("username")
-
-    if existing_email:
-        typer.echo(f"Existing email or username found: {existing_email}")
-        confirm = typer.confirm("Do you want to change it?", default=False)
-
-        if confirm:
-            email_or_username, password = _ask_username_and_password()
-
-        else:
-            email_or_username = existing_email
-            password = get_config_value("password")
-
-            if not password:
-                password = _ask_password()
+    if username and password:
+        email_or_username = username
     else:
-        email_or_username, password = _ask_username_and_password()
+        existing_email = get_config_value("username")
+
+        if existing_email:
+            typer.echo(f"Existing email or username found: {existing_email}")
+            confirm = typer.confirm("Do you want to change it?", default=False)
+
+            if confirm:
+                email_or_username, password = _ask_username_and_password()
+
+            else:
+                email_or_username = existing_email
+                password = get_config_value("password")
+
+                if not password:
+                    password = _ask_password()
+        else:
+            email_or_username, password = _ask_username_and_password()
 
     client = APIClient()
 
