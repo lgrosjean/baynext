@@ -1,12 +1,8 @@
-from datetime import UTC
-from datetime import datetime as dt
-from unittest.mock import patch
-
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.core.settings import settings
+from app.main import app
 
 client = TestClient(app)
 
