@@ -2,8 +2,8 @@
 
 import typer
 
-from baynext_cli.config import get_config
-from baynext_cli.utils import PropertyArg
+from baynext.config import get_config
+from baynext.utils import PropertyArg
 
 app = typer.Typer()
 

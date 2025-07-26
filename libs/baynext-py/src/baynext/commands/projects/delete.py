@@ -4,7 +4,7 @@ from typing import Annotated
 
 import typer
 
-from baynext_cli.client import APIClient
+from baynext.client import APIClient
 
 app = typer.Typer()
 

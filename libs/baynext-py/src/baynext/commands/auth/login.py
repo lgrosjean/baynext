@@ -4,8 +4,8 @@ import getpass
 
 import typer
 
-from baynext_cli.client import APIClient
-from baynext_cli.config import get_config_value, save_token, set_config
+from baynext.client import APIClient
+from baynext.config import get_config_value, save_token, set_config
 
 app = typer.Typer()
 

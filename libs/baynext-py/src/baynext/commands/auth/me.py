@@ -5,8 +5,8 @@ from rich import print_json
 from rich.console import Console
 from rich.table import Table
 
-from baynext_cli.client import APIClient
-from baynext_cli.utils import OutputFormat, OutputOption
+from baynext.client import APIClient
+from baynext.utils import OutputFormat, OutputOption
 
 console = Console()
 

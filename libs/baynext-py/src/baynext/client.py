@@ -7,7 +7,7 @@ import httpx
 import typer
 from rich.logging import RichHandler
 
-from baynext_cli.config import get_api_url, get_token
+from baynext.config import get_api_url, get_token
 
 logging.basicConfig(
     level="INFO",

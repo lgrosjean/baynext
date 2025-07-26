@@ -2,8 +2,8 @@
 
 import typer
 
-from baynext_cli import __version__
-from baynext_cli.commands import auth, config, projects
+from baynext import __version__
+from baynext.commands import auth, config, projects
 
 app = typer.Typer(
     name="Baynext",

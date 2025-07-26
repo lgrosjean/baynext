@@ -2,7 +2,7 @@
 
 import typer
 
-from baynext_cli.config import get_token
+from baynext.config import get_token
 
 app = typer.Typer()
 

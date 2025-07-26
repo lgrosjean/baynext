@@ -4,7 +4,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from baynext_cli.config import get_config
+from baynext.config import get_config
 
 app = typer.Typer()
 
