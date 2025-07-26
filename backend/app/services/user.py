@@ -2,8 +2,7 @@
 
 from sqlmodel import Session, select
 
-from app.core.security import verify_password
-from app.schemas.user import User, UserCreate, UserPublic, UserUpdate
+from app.models.user import User
 
 
 class UserService:
@@ -18,27 +17,27 @@ class UserService:
         """
         self.session = session
 
-    def create(self, user_data: UserCreate) -> User:
-        """Create a new user in the database.
+    # def create(self, user_data: UserCreate) -> User:
+    #     """Create a new user in the database.
 
-        Args:
-            user_data: User creation data containing required fields
+    #     Args:
+    #         user_data: User creation data containing required fields
 
-        Returns:
-            User: The created user with generated timestamps
+    #     Returns:
+    #         User: The created user with generated timestamps
 
-        Raises:
-            Exception: If user creation fails or email already exists
+    #     Raises:
+    #         Exception: If user creation fails or email already exists
 
-        """
-        # Convert UserCreate to User model for database storage
-        db_user = User.model_validate(user_data)
+    #     """
+    #     # Convert UserCreate to User model for database storage
+    #     db_user = User.model_validate(user_data)
 
-        self.session.add(db_user)
-        self.session.commit()
-        self.session.refresh(db_user)
+    #     self.session.add(db_user)
+    #     self.session.commit()
+    #     self.session.refresh(db_user)
 
-        return db_user
+    #     return db_user
 
     def get_by_id(self, user_id: str) -> User | None:
         """Retrieve a user by their ID.
@@ -65,68 +64,36 @@ class UserService:
         statement = select(User).where(User.email == email)
         return self.session.exec(statement).first()
 
-    def authenticate_user(self, email: str, password: str) -> User | None:
-        """Authenticate a user by email and password.
+    # def update(
+    #     self,
+    #     user_id: str,
+    #     *,
+    #     user: UserUpdate,
+    # ) -> User | None:
+    #     """Update a user's information.
 
-        Args:
-            email: The user's email address
-            password: The user's password
+    #     Args:
+    #         user_id: The unique identifier for the user
+    #         user: User update data containing fields to modify
 
-        Returns:
-            User if authentication is successful, None otherwise
+    #     Returns:
+    #         Updated User object if successful, None if user not found
 
-        """
-        user = self.get_by_email(email)
+    #     """
+    #     db_user = self.get_by_id(user_id)
+    #     if not db_user:
+    #         return None
 
-        if user and verify_password(password, user.password):
-            return user
-        return None
+    #     # Update fields from UserUpdate model
+    #     # Source: https://sqlmodel.tiangolo.com/tutorial/fastapi/update/#update-the-hero-in-the-database
+    #     user_data = user.model_dump(exclude_unset=True)
+    #     db_user.sqlmodel_update(user_data)
 
-    def get_public(self, user_id: str) -> UserPublic | None:
-        """Get a user's public information by ID.
+    #     self.session.add(db_user)
+    #     self.session.commit()
+    #     self.session.refresh(db_user)
 
-        Args:
-            user_id: The unique identifier for the user
-
-        Returns:
-            UserPublic model with safe public data, None if not found
-
-        """
-        user = self.get_by_id(user_id)
-        if user:
-            return UserPublic.model_validate(user)
-        return None
-
-    def update(
-        self,
-        user_id: str,
-        *,
-        user: UserUpdate,
-    ) -> User | None:
-        """Update a user's information.
-
-        Args:
-            user_id: The unique identifier for the user
-            user: User update data containing fields to modify
-
-        Returns:
-            Updated User object if successful, None if user not found
-
-        """
-        db_user = self.get_by_id(user_id)
-        if not db_user:
-            return None
-
-        # Update fields from UserUpdate model
-        # Source: https://sqlmodel.tiangolo.com/tutorial/fastapi/update/#update-the-hero-in-the-database
-        user_data = user.model_dump(exclude_unset=True)
-        db_user.sqlmodel_update(user_data)
-
-        self.session.add(db_user)
-        self.session.commit()
-        self.session.refresh(db_user)
-
-        return db_user
+    #     return db_user
 
     def delete(self, user_id: str) -> bool:
         """Delete a user from the database.

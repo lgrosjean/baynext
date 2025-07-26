@@ -1,23 +1,37 @@
 """Defines dependencies for FastAPI routes."""
 
 from typing import Annotated
+from uuid import uuid4
 
-from fastapi import Depends, HTTPException, Security, status
-from fastapi.security import APIKeyHeader, APIKeyQuery, OAuth2PasswordBearer
-from sqlmodel import Session
+from fastapi import Depends, HTTPException, Path, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlmodel import Session, select
 
 from app.core.db import get_session
 from app.core.exceptions import UnauthorizedError
-from app.core.security import decode_jwt_token
-from app.schemas.user import User
-from app.services import DatasetService, ProjectService, UserService
-from app.services.key import KeyService
+from app.core.logging import get_logger
+from app.models import Membership, Project, User
+from app.models.enums import UserRole
+from app.services import AuthService, UserService
 
-_API_KEY_HEADER = "x-baynext-api-key"
-"""Header name for API key authentication."""
+ProjectId = Annotated[
+    str,
+    Path(
+        # description="Project ID",
+        example=f"{uuid4()!s}",
+    ),
+]
 
-_API_KEY_QUERY = "key"
-"""Query parameter name for API key authentication."""
+logger = get_logger(__name__)
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="v1/auth/token",
+    scheme_name="Bearer",
+    description="JWT Bearer token for authentication",
+    refreshUrl="v1/auth/token/refresh",
+    auto_error=False,
+)
+
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -35,71 +49,21 @@ def get_user_service(session: SessionDep) -> UserService:
     return UserService(session=session)
 
 
-def get_project_service(session: SessionDep) -> ProjectService:
-    """Dependency to get a ProjectService instance.
-
-    Args:
-        session: SQLModel database session for operations
-
-    Returns:
-        ProjectService: An instance of ProjectService initialized with the session
-
-    """
-    return ProjectService(session=session)
-
-
-def get_dataset_service(session: SessionDep) -> DatasetService:
-    """Dependency to get a DatasetService instance.
-
-    Args:
-        session: SQLModel database session for operations
-
-    Returns:
-        DatasetService: An instance of DatasetService initialized with the session
-        and project ID.
-
-    """
-    return DatasetService(session=session)
-
-
-def get_key_service(session: SessionDep, project_id: str) -> KeyService:
-    """Dependency to get a KeyService instance.
-
-    Args:
-        project_id: ID of the project for which to manage keys
-        session: SQLModel database session for operations
-
-    Returns:
-        KeyService: An instance of KeyService initialized with the session
-
-    """
-    return KeyService(session=session, project_id=project_id)
-
-
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
-ProjectServiceDep = Annotated[ProjectService, Depends(get_project_service)]
-DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
-KeyServiceDep = Annotated[KeyService, Depends(get_key_service)]
-
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="v1/auth/token",
-    scheme_name="Bearer",
-    description="JWT Bearer token for authentication",
-    refreshUrl="v1/auth/token/refresh",
-    auto_error=False,
-)
+"""Dependency to get a UserService instance."""
 
 
 def get_current_user(
-    user_service: UserServiceDep,
-    token: str = Depends(oauth2_scheme),
+    session: SessionDep,
+    token: Annotated[str, Depends(oauth2_scheme)],
 ) -> User:
-    """Dependency to get the currently authenticated user.
+    """Get the currently authenticated user.
 
-    This function retrieves the current user from the UserService.
+    This function retrieves the current user from the UserService using
+    the provided JWT token.
 
     Args:
-        user_service: An instance of UserService
+        session: SQLModel database session for operations
         token: The JWT token from the request
 
     Returns:
@@ -109,9 +73,9 @@ def get_current_user(
         UnauthorizedError: If the user is not authenticated
 
     """
-    payload = decode_jwt_token(token)
+    payload = AuthService.decode_jwt_token(token)
     user_id = payload.get("sub")
-    user = user_service.get_by_id(user_id)
+    user = session.exec(select(User).where(User.id == user_id)).first()
     if not user:
         message = "User is not authenticated"
         raise UnauthorizedError(message)
@@ -122,87 +86,181 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
 """Dependency to get the currently authenticated user."""
 
 
-async def check_jwt(
-    token: str = Depends(oauth2_scheme),
-) -> None:
-    """Verify the JWT token in the request."""
-    try:
-        decode_jwt_token(token)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=403,
-            detail="Invalid or expired JWT token",
-        ) from exc
+def get_project_member_or_owner(
+    project_id: ProjectId,
+    current_user: CurrentUserDep,
+    session: SessionDep,
+) -> tuple[Project, Membership | None]:
+    """Get project and user's membership (if any)."""
+    project_not_found = HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Project not found",
+    )
 
+    access_denied = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access denied to this project",
+    )
 
-query_scheme = APIKeyQuery(name=_API_KEY_QUERY, auto_error=False)
+    # Get project
+    project = session.exec(select(Project).where(Project.id == project_id)).first()
 
+    if not project:
+        raise project_not_found
 
-class NotMatchedProjectError(HTTPException):
-    """Custom exception for project ID mismatch with API key."""
+    # Check if user is owner
+    if project.owner_id == current_user.id:
+        return project, None
 
-    def __init__(self, project_id: str) -> None:
-        """Initialize the NotMatchedProjectError with a project ID."""
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"API key does not match the project ID: {project_id}",
+    # Check if user is member
+    member_statement = select(Membership).where(
+        Membership.project_id == project_id,
+        Membership.user_id == current_user.id,
+    )
+    member_result = session.exec(member_statement)
+    membership = member_result.first()
+
+    if not membership:
+        logger.warning(
+            "User %s tried to access project %s without membership",
+            current_user.id,
+            project_id,
         )
+        raise access_denied
+
+    return project, membership
 
 
-async def check_api_key_in_query(
-    api_key: Annotated[str, Depends(query_scheme)],
-    key_service: KeyServiceDep,
-    project_id: str,
-) -> None:
-    """Verify the key in the query parameters."""
-    key_found = key_service.get_by_value(api_key)
-    if not key_found:
-        # If the key is not found, raise an HTTPException
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Key query parameter invalid",
+def require_project_admin(
+    project_id: ProjectId,
+    current_user: CurrentUserDep,
+    session: SessionDep,
+) -> Project:
+    """Require user to be project owner or admin."""
+    admin_access_required = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Admin access required",
+    )
+
+    project, membership = get_project_member_or_owner(
+        project_id,
+        current_user,
+        session,
+    )
+
+    # Owner has admin rights
+    if project.owner_id == current_user.id:
+        logger.info(
+            "🔐 User %s is the owner of project %s", current_user.id, project_id
         )
-    # If the key is valid, continue processing the request
-    if key_found.project_id != project_id:
-        raise NotMatchedProjectError(project_id)
+        return project
+
+    # Check if user is admin member
+    if membership and membership.role == UserRole.ADMIN:
+        logger.info("🔐 User %s is an admin of project %s", current_user.id, project_id)
+        return project
+
+    raise admin_access_required
 
 
-header_scheme = APIKeyHeader(name=_API_KEY_HEADER, auto_error=False)
+def require_project_editor(
+    project_id: ProjectId,
+    current_user: CurrentUserDep,
+    session: SessionDep,
+) -> Project:
+    """Require user to be project owner, admin, or editor."""
+    editor_access_required = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Editor access required",
+    )
+
+    project, membership = get_project_member_or_owner(
+        project_id,
+        current_user,
+        session,
+    )
+
+    # Owner has all rights
+    if project.owner_id == current_user.id:
+        return project
+
+    # Check if user has editor or admin rights
+    if membership and membership.role in [UserRole.ADMIN, UserRole.EDITOR]:
+        return project
+
+    raise editor_access_required
 
 
-async def check_api_key_in_header(
-    api_key: Annotated[str, Depends(header_scheme)],
-    key_service: KeyServiceDep,
-    project_id: str,
-) -> None:
-    """Verify the API key in the request header."""
-    key_found = key_service.get_by_value(api_key)
-    if not key_found:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="X-baynext-api-key header invalid",
-        )
-    if key_found.project_id != project_id:
-        raise NotMatchedProjectError(project_id)
+# from fastapi.security import APIKeyHeader, APIKeyQuery,
+
+# query_scheme = APIKeyQuery(name=_API_KEY_QUERY, auto_error=False)
 
 
-async def check_auth(
-    api_key_headers: Annotated[str, Depends(header_scheme)],
-    api_key_query: Annotated[str, Depends(query_scheme)],
-    token: Annotated[str, Depends(oauth2_scheme)],
-) -> None:
-    """Check authentication credentials in the request."""
-    if token:
-        await check_jwt(token)
-    elif api_key_headers:
-        await check_api_key_in_header(api_key_headers)
-    elif api_key_query:
-        await check_api_key_in_query(api_key_query)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="No authentication credentials provided",
-        )
+# class NotMatchedProjectError(HTTPException):
+#     """Custom exception for project ID mismatch with API key."""
+
+#     def __init__(self, project_id: str) -> None:
+#         """Initialize the NotMatchedProjectError with a project ID."""
+#         super().__init__(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail=f"API key does not match the project ID: {project_id}",
+#         )
 
 
-CheckAuthDeps = Security(check_auth)
+# async def check_api_key_in_query(
+#     api_key: Annotated[str, Depends(query_scheme)],
+#     key_service: KeyServiceDep,
+#     project_id: str,
+# ) -> None:
+#     """Verify the key in the query parameters."""
+#     key_found = key_service.get_by_value(api_key)
+#     if not key_found:
+#         # If the key is not found, raise an HTTPException
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Key query parameter invalid",
+#         )
+#     # If the key is valid, continue processing the request
+#     if key_found.project_id != project_id:
+#         raise NotMatchedProjectError(project_id)
+
+
+# header_scheme = APIKeyHeader(name=_API_KEY_HEADER, auto_error=False)
+
+
+# async def check_api_key_in_header(
+#     api_key: Annotated[str, Depends(header_scheme)],
+#     key_service: KeyServiceDep,
+#     project_id: str,
+# ) -> None:
+#     """Verify the API key in the request header."""
+#     key_found = key_service.get_by_value(api_key)
+#     if not key_found:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="X-baynext-api-key header invalid",
+#         )
+#     if key_found.project_id != project_id:
+#         raise NotMatchedProjectError(project_id)
+
+
+# async def check_auth(
+#     api_key_headers: Annotated[str, Depends(header_scheme)],
+#     api_key_query: Annotated[str, Depends(query_scheme)],
+#     token: Annotated[str, Depends(oauth2_scheme)],
+# ) -> None:
+#     """Check authentication credentials in the request."""
+#     if token:
+#         await check_jwt(token)
+#     elif api_key_headers:
+#         await check_api_key_in_header(api_key_headers)
+#     elif api_key_query:
+#         await check_api_key_in_query(api_key_query)
+#     else:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="No authentication credentials provided",
+#         )
+
+
+# CheckAuthDeps = Security(check_auth)

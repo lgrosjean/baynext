@@ -292,6 +292,13 @@ class DatasetUpdate(SQLModel):
 class DatasetPublic(BaseModel):
     """Public dataset model for API responses."""
 
+    name: str = Field(
+        description="Dataset name",
+        schema_extra={
+            "examples": ["Sales Data Q1 2023", "Marketing Campaign Dataset"],
+        },
+    )
+
     id: str = Field(
         description="Unique dataset identifier",
         schema_extra={

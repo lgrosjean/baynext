@@ -8,7 +8,7 @@ from .settings import settings
 
 engine = create_engine(
     settings.database_url.get_secret_value().replace("postgres://", "postgresql://"),
-    echo=not settings.is_prod(),
+    echo=settings.DEBUG,
 )
 
 

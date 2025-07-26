@@ -3,6 +3,7 @@
 import secrets
 import uuid
 from datetime import datetime, timedelta
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
@@ -11,6 +12,8 @@ if TYPE_CHECKING:
     from .project import Project
 
 _PREFIX = "key_"
+
+# TODO(@lgrosjean): Create permissions (write, delete, read)
 
 
 class KeyBase(SQLModel):
@@ -53,7 +56,6 @@ class Key(KeyBase, table=True):
         description="Hashed version of the API key for security",
         index=True,
     )
-
     is_active: bool = Field(
         default=True,
         description="Whether the API key is active and can be used",

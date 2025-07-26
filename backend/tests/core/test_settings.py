@@ -10,7 +10,7 @@ def test_settings_initialization():
         blob_read_write_token="test_blob_token",
     )
     assert settings.environment == Env.development
-    assert settings.app_name == "Baynext API"
+    assert settings.APP_NAME == "Baynext API"
     assert settings.ml_api_secret_api_key.get_secret_value() == "test_secret_key"
     assert settings.database_url.get_secret_value() == "test_database_url"
     assert settings.blob_read_write_token.get_secret_value() == "test_blob_token"

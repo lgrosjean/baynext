@@ -1,8 +1,6 @@
 """Health check endpoints."""
 
-from fastapi import APIRouter, Request
-
-from app.validations.health import HealthResponse
+from fastapi import APIRouter
 
 router = APIRouter(
     prefix="/health",
@@ -12,11 +10,9 @@ router = APIRouter(
 
 
 @router.get("/")
-async def health_check(request: Request) -> HealthResponse:
+async def health_check() -> dict:
     """Health check endpoint.
 
     Returns the health status of the service.
     """
-    return HealthResponse(
-        version=request.app.version,
-    )
+    return {"status": "healthy"}
