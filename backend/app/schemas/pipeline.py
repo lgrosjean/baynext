@@ -15,6 +15,7 @@ from app.validations.model_spec import ModelSpec
 if TYPE_CHECKING:
     from .dataset import Dataset
     from .job import Job
+    from app.models.project import Project
 
 
 _PREFIX = "pipe_"
