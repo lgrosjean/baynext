@@ -1,14 +1,11 @@
-from ..schemas import Dataset, Model
-from .base import make_service
-from .job import JobService
-from .pipeline import PipelineService
+"""Database services for the application."""
 
-DatasetService = make_service(Dataset)
-ModelService = make_service(Model)
+from .auth import AuthService
+from .project import ProjectService
+from .user import UserService
 
 __all__ = [
-    "DatasetService",
-    "JobService",
-    "ModelService",
-    "PipelineService",
+    "AuthService",
+    "ProjectService",
+    "UserService",
 ]
