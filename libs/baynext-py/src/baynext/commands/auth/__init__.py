@@ -8,7 +8,7 @@ from .token import app as token_app
 
 app = typer.Typer(
     name="auth",
-    help="🔐 Managee Baynext CLI credentials",
+    help="🔐 Manage Baynext CLI credentials",
 )
 
 app.add_typer(login_app)

@@ -45,14 +45,15 @@ async def get_access_token(
         password=form_data.password,
     )
 
-    logger.info("✅ User found: %s", user.id)
-
     if not user:
+        logger.warning("🔒 User not found: %s", form_data.username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    logger.info("✅ User found: %s", user.id)
 
     data = {
         "sub": user.id,

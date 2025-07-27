@@ -4,7 +4,6 @@ import logging
 from typing import Any
 
 import httpx
-import typer
 from rich.logging import RichHandler
 
 from baynext.config import get_api_url, get_token
@@ -19,7 +18,6 @@ logging.basicConfig(
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
-
 
 ERROR_401_UNAUTHORIZED = "🔒 Unauthorized, please login again with `baynext auth login`"
 ERROR_403_FORBIDDEN = "⛔️ Forbidden"
@@ -44,41 +42,37 @@ class APIClient:
 
     def _handle_response(self, response: httpx.Response) -> dict[str, Any]:
         """Handle API response."""
-        try:
-            if response.status_code == httpx.codes.UNAUTHORIZED:
-                logger.error(ERROR_401_UNAUTHORIZED)
-                raise ERROR_401_UNAUTHORIZED
+        if response.status_code == httpx.codes.UNAUTHORIZED:
+            logger.error("🔒 Unauthorized: %s", response.text)
+            response.raise_for_status()
 
-            if response.status_code == httpx.codes.FORBIDDEN:
-                logger.error(ERROR_403_FORBIDDEN)
-                raise ERROR_403_FORBIDDEN
+        if response.status_code == httpx.codes.FORBIDDEN:
+            logger.error(ERROR_403_FORBIDDEN)
+            response.raise_for_status()
 
-            if response.status_code == httpx.codes.NOT_FOUND:
-                logger.error(ERROR_404_NOT_FOUND)
-                raise ERROR_404_NOT_FOUND
+        if response.status_code == httpx.codes.NOT_FOUND:
+            logger.error(ERROR_404_NOT_FOUND)
+            response.raise_for_status()
 
-            if not response.is_success:
-                error_data = (
-                    response.json()
-                    if response.headers.get("content-type", "").startswith(
-                        "application/json",
-                    )
-                    else {}
+        if not response.is_success:
+            error_data = (
+                response.json()
+                if response.headers.get("content-type", "").startswith(
+                    "application/json",
                 )
-                error_msg = error_data.get(
-                    "detail",
-                    f"HTTP {response.status_code} error",
-                )
-                typer.echo(f"❌ Error: {error_msg}", err=True)
-                raise typer.Exit(1)
+                else {}
+            )
+            error_msg = error_data.get(
+                "detail",
+                f"HTTP {response.status_code} error",
+            )
+            logger.error(error_msg)
+            response.raise_for_status()
 
-            if response.status_code == httpx.codes.NO_CONTENT:
-                return {"success": True}
+        if response.status_code == httpx.codes.NO_CONTENT:
+            return {"success": True}
 
-            return response.json()
-
-        except httpx.HTTPError:
-            logger.exception("HTTP error occurred")
+        return response.json()
 
     def _request(
         self,

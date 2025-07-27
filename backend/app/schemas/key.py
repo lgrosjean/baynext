@@ -2,13 +2,9 @@
 
 import secrets
 import uuid
-from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from datetime import datetime, timedelta, UTC
 
 from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from .project import Project
 
 _PREFIX = "key_"
 
@@ -60,16 +56,16 @@ class Key(KeyBase, table=True):
         description="Whether the API key is active and can be used",
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(datetime.UTC),
+        default_factory=lambda: datetime.now(UTC),
         description="Timestamp when the API key was created",
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(datetime.UTC),
+        default_factory=lambda: datetime.now(UTC),
         description="Timestamp when the API key was last updated",
     )
 
     # Relationships
-    project: "Project" = Relationship(back_populates="api_keys")
+    # project: "Project" = Relationship(back_populates="api_keys")
 
     @property
     def is_expired(self) -> bool:

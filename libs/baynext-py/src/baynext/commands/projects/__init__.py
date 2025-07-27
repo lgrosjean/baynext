@@ -1,4 +1,4 @@
-"""`baynext auth` commands."""
+"""`baynext projects` commands."""
 
 import typer
 

@@ -5,7 +5,7 @@ import getpass
 import typer
 
 from baynext.client import APIClient
-from baynext.config import get_config_value, save_token, set_config
+from baynext.config import get_config_value, get_token, save_token, set_config
 
 app = typer.Typer()
 
@@ -20,9 +20,7 @@ def _ask_username() -> str:
 
 def _ask_password() -> str:
     """Prompt for password."""
-    password = getpass.getpass("Password: ")
-    set_config("password", password)
-    return password
+    return getpass.getpass("Password: ")
 
 
 def _ask_username_and_password() -> tuple[str, str]:
@@ -48,6 +46,8 @@ def login(
     ),
 ) -> None:
     """🔓 Login to your account and get an access token."""
+    client = APIClient()
+
     if username and password:
         email_or_username = username
     else:
@@ -55,21 +55,27 @@ def login(
 
         if existing_email:
             typer.echo(f"Existing email or username found: {existing_email}")
-            confirm = typer.confirm("Do you want to change it?", default=False)
+            confirm = typer.confirm(
+                "Do you want to log in with a different account?",
+                default=False,
+            )
 
             if confirm:
                 email_or_username, password = _ask_username_and_password()
 
             else:
-                email_or_username = existing_email
-                password = get_config_value("password")
+                try:
+                    client.me()
+                    typer.echo("✅ Already logged in with existing account!")
+                    return
 
-                if not password:
+                except Exception:
+                    typer.echo("⏳ Session expired or invalid. Please log in again.")
+                    email_or_username = existing_email
                     password = _ask_password()
+
         else:
             email_or_username, password = _ask_username_and_password()
-
-    client = APIClient()
 
     try:
         response = client.get_token(email_or_username, password)

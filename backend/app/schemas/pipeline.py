@@ -15,7 +15,6 @@ from app.validations.model_spec import ModelSpec
 if TYPE_CHECKING:
     from .dataset import Dataset
     from .job import Job
-    from .project import Project
 
 
 _PREFIX = "pipe_"
@@ -81,7 +80,7 @@ class PipelineCreate(PipelineBase):
             uuid.UUID(v)
         except ValueError as exc:
             raise ValueError(INVALID_DATASET_ID_FORMAT_ERROR) from exc
-        return
+        return v
 
 
 class PipelinePublic(PipelineBase):

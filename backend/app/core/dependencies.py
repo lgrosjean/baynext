@@ -16,10 +16,7 @@ from app.services import AuthService, UserService
 
 ProjectId = Annotated[
     str,
-    Path(
-        # description="Project ID",
-        example=f"{uuid4()!s}",
-    ),
+    Path(example=f"{uuid4()!s}"),
 ]
 
 logger = get_logger(__name__)
@@ -70,15 +67,18 @@ def get_current_user(
         User: The currently authenticated user
 
     Raises:
-        UnauthorizedError: If the user is not authenticated
+        UnauthorizedError: If the user is not authenticated or the token is invalid
 
     """
+    missing_token_message = "Authentication token is missing"  # noqa: S105
+    not_authenticated_message = "User is not authenticated"
+    if not token:
+        raise UnauthorizedError(missing_token_message)
     payload = AuthService.decode_jwt_token(token)
     user_id = payload.get("sub")
     user = session.exec(select(User).where(User.id == user_id)).first()
     if not user:
-        message = "User is not authenticated"
-        raise UnauthorizedError(message)
+        raise UnauthorizedError(not_authenticated_message)
     return user
 
 
