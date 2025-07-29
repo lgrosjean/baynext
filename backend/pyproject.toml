@@ -1,6 +1,6 @@
 [project]
 name = "baynext-api"
-version = "0.1.1"
+version = "0.1.0"
 description = "Baynext API for managing datasets, jobs, and pipelines"
 readme = "README.md"
 requires-python = ">=3.12"
