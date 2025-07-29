@@ -19,9 +19,47 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+_USER_AGENT = "Baynext CLI"
+
 ERROR_401_UNAUTHORIZED = "🔒 Unauthorized, please login again with `baynext auth login`"
 ERROR_403_FORBIDDEN = "⛔️ Forbidden"
 ERROR_404_NOT_FOUND = "❓ Not Found"
+
+
+class UnauthorizedError(httpx.HTTPStatusError):
+    """Custom exception for unauthorized access."""
+
+    def __init__(self, request: httpx.Request, response: httpx.Response) -> None:
+        """Initialize UnauthorizedError with a custom message."""
+        super().__init__(
+            message=ERROR_401_UNAUTHORIZED,
+            request=request,
+            response=response,
+        )
+
+
+class ForbiddenError(httpx.HTTPStatusError):
+    """Custom exception for forbidden access."""
+
+    def __init__(self, request: httpx.Request, response: httpx.Response) -> None:
+        """Initialize ForbiddenError with a custom message."""
+        super().__init__(
+            message=ERROR_403_FORBIDDEN,
+            request=request,
+            response=response,
+        )
+
+
+class NotFoundError(httpx.HTTPStatusError):
+    """Custom exception for not found errors."""
+
+    def __init__(self, request: httpx.Request, response: httpx.Response) -> None:
+        """Initialize NotFoundError with a custom message."""
+        super().__init__(
+            message=ERROR_404_NOT_FOUND,
+            request=request,
+            response=response,
+        )
 
 
 class APIClient:
