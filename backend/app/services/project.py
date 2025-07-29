@@ -1,4 +1,4 @@
-"""User service for managing user CRUD operations."""
+"""Dataset service for managing dataset CRUD operations."""
 
 from sqlmodel import Session, or_, select
 
