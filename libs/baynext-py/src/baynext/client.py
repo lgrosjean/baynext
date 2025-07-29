@@ -76,21 +76,22 @@ class APIClient:
         headers = headers or {}
         if self._token:
             headers["Authorization"] = f"Bearer {self._token}"
+        headers["User-Agent"] = _USER_AGENT
         return headers
 
     def _handle_response(self, response: httpx.Response) -> dict[str, Any]:
         """Handle API response."""
         if response.status_code == httpx.codes.UNAUTHORIZED:
             logger.error("🔒 Unauthorized: %s", response.text)
-            response.raise_for_status()
+            raise UnauthorizedError(response.request, response)
 
         if response.status_code == httpx.codes.FORBIDDEN:
             logger.error(ERROR_403_FORBIDDEN)
-            response.raise_for_status()
+            raise ForbiddenError(response.request, response)
 
         if response.status_code == httpx.codes.NOT_FOUND:
             logger.error(ERROR_404_NOT_FOUND)
-            response.raise_for_status()
+            raise NotFoundError(response.request, response)
 
         if not response.is_success:
             error_data = (

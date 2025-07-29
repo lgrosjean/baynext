@@ -1,17 +1,26 @@
 """Configuration management for Baynext CLI."""
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 import typer
+from dotenv import find_dotenv, load_dotenv
+
+# Load environment variables from .env.local if it exists
+load_dotenv(find_dotenv(".env.local", raise_error_if_not_found=False))
+# Load environment variables from .env if it exists
+# This allows overriding .env.local with .env if both are present
+# Useful for production vs development configurations
+load_dotenv(find_dotenv(".env", raise_error_if_not_found=False))
 
 CONFIG_DIR = Path.home() / ".config" / "baynext"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
-BAYNEXT_API_BASE_URL = "http://localhost:8000/v1"
-"""Default to local development server if no API URL is set.
-This can be overridden in the config file."""
+BAYNEXT_API_URL = "https://api.baynext.tech"
+BAYNEXT_API_BASE_URL = os.getenv("BAYNEXT_API_URL", BAYNEXT_API_URL) + "/v1"
+"""Default API URL for Baynext CLI."""
 
 
 def ensure_config_dir() -> None:
