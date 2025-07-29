@@ -321,25 +321,3 @@ class DatasetPublic(BaseModel):
         if isinstance(v, HttpUrl):
             return v
         return HttpUrl(v)
-
-
-class DatasetWithDetails(DatasetPublic):
-    """Dataset model with related entities for detailed API responses."""
-
-    pipelines_count: int = Field(default=0, description="Number of pipelines")
-    file_size: int | None = Field(default=None, description="File size in bytes")
-    row_count: int | None = Field(default=None, description="Number of data rows")
-    last_accessed: datetime | None = Field(
-        default=None,
-        description="Last access timestamp",
-    )
-
-
-class DatasetListResponse(SQLModel):
-    """Response model for dataset list endpoints."""
-
-    datasets: list[DatasetPublic]
-    total: int
-    page: int
-    size: int
-    has_next: bool
