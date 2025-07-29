@@ -131,6 +131,12 @@ def get_project_member_or_owner(
     return project, membership
 
 
+CurrentProjectMembershipDep = Annotated[
+    tuple[Project, Membership | None],
+    Depends(get_project_member_or_owner),
+]
+
+
 def require_project_admin(
     project_id: ProjectId,
     current_user: CurrentUserDep,
