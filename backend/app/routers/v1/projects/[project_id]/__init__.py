@@ -4,7 +4,6 @@ This module defines the API endpoints for managing resources related to a specif
 """
 
 from .base import router
+from .datasets import router as datasets_router
 
-__all__ = [
-    "router",
-]
+router.include_router(datasets_router)
