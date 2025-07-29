@@ -1,6 +1,6 @@
 """API v1 module."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
 from . import auth, me, projects
 
