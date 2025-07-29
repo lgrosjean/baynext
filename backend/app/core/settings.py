@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
         "https://baynext.tech",  # Your production domain
+        "https://www.baynext.tech",
     ]
 
     environment: Env = Env.development
