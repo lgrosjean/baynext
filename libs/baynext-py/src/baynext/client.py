@@ -178,6 +178,7 @@ class APIClient:
         """Get current user information."""
         return self._get("/me")
 
+    # Projects
     def list_projects(self) -> list[dict[str, Any]]:
         """List all projects."""
         return self._get("/projects")
@@ -194,3 +195,12 @@ class APIClient:
     def delete_project(self, project_id: str) -> dict[str, Any]:
         """Delete a project."""
         return self._delete(f"/projects/{project_id}")
+
+    # Datasets
+    def list_datasets(self, project_id: str) -> list[dict[str, Any]]:
+        """List datasets in a project."""
+        return self._get(f"/projects/{project_id}/datasets")
+
+    def get_dataset(self, project_id: str, dataset_id: str) -> dict[str, Any]:
+        """Get details of a specific dataset."""
+        return self._get(f"/projects/{project_id}/datasets/{dataset_id}")
