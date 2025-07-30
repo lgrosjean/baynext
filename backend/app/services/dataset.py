@@ -1,7 +1,5 @@
 """Dataset service for managing dataset CRUD operations."""
 
-import os
-
 from sqlmodel import Session, desc, select
 
 from app.core.logging import get_logger

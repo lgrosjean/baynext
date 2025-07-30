@@ -27,3 +27,4 @@ def test_settings_env_file_loading(monkeypatch):
     settings = Settings()
     assert settings.ml_api_secret_api_key.get_secret_value() == ml_api_secret_api_key
     assert settings.environment == Env.production
+    assert settings.BUCKET_NAME == "bucket_name"  # Default value from Settings
