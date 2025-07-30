@@ -1,7 +1,5 @@
 """`baynext datasets list` command."""
 
-from typing import Annotated
-
 import typer
 from httpx import HTTPStatusError
 from rich import print_json
@@ -9,9 +7,8 @@ from rich.console import Console
 from rich.table import Table
 
 from baynext.client import APIClient, ForbiddenError, NotFoundError, UnauthorizedError
+from baynext.commands.utils import get_project_id_from_ctx
 from baynext.utils import OutputFormat, OutputOption
-
-from .utils import get_project_id_from_ctx
 
 app = typer.Typer()
 
@@ -36,13 +33,13 @@ def list(  # noqa: A001
             table = Table()
             table.add_column("ID")
             table.add_column("Name")
-            table.add_column("KPI type")
+            table.add_column("Created at")
 
             for dataset in response:
                 table.add_row(
                     str(dataset["id"]),
                     dataset["displayName"],
-                    dataset.get("kpiType", "N/A"),
+                    dataset["createdAt"],
                 )
 
             console.print(table)
@@ -50,7 +47,8 @@ def list(  # noqa: A001
         typer.echo(exc, err=True)
     except (ForbiddenError, NotFoundError) as exc:
         typer.echo(
-            "❌ You may not have permission to access this project or it may not exist.",
+            "❌ You may not have permission to access this project "
+            "or it may not exist.",
             err=True,
         )
         raise typer.Exit(1) from exc

@@ -9,9 +9,8 @@ from rich.console import Console
 from rich.table import Table
 
 from baynext.client import APIClient, ForbiddenError, NotFoundError, UnauthorizedError
+from baynext.commands.utils import get_project_id_from_ctx
 from baynext.utils import OutputFormat, OutputOption
-
-from .utils import get_project_id_from_ctx
 
 app = typer.Typer()
 

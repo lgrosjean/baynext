@@ -36,13 +36,11 @@ def get(
             table = Table()
             table.add_column("Id")
             table.add_column("Name")
-            table.add_column("Description")
             table.add_column("Created At")
 
             table.add_row(
                 str(response["id"]),
                 response["name"],
-                response["description"],
                 response["created_at"],
             )
 
