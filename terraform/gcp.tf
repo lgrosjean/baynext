@@ -110,6 +110,8 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
   location = local.location
   project  = var.project_id
 
+  invoker_iam_disabled = true
+
   template {
     service_account = google_service_account.cloud_run_backend_sa.email
     containers {
@@ -141,7 +143,12 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
     }
   }
 
-
+  lifecycle {
+    ignore_changes = [
+      template[0].containers[0].image,
+      template[0].labels,
+    ]
+  }
 
 }
 
@@ -150,17 +157,6 @@ resource "google_storage_bucket" "dataset_bucket" {
   name     = "${var.project_id}-dataset-files"
   location = local.location
   project  = var.project_id
-
-  uniform_bucket_level_access = true
-
-  lifecycle_rule {
-    condition {
-      age = 90
-    }
-    action {
-      type = "Delete"
-    }
-  }
 }
 
 # Grant the backend service account admin access to upload and manage files in the dataset bucket
