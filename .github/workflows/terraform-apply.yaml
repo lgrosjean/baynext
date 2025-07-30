@@ -58,3 +58,16 @@ jobs:
 
         - name: Terraform Apply
           run: terraform apply -input=false -auto-approve -var="project_id=${{ env.GCP_PROJECT }}"
+
+        - name: Extract Neon Database URL from Terraform Output
+          id: extract-db-url
+          run: |
+            DB_URL=$(terraform output -raw neon_database_url)
+            echo "::add-mask::$DB_URL"
+            echo "DATABASE_URL=$DB_URL" >> $GITHUB_OUTPUT
+
+        - name: Update GitHub Repository Secret
+          run: |
+            echo "${{ steps.extract-db-url.outputs.DATABASE_URL }}" | gh secret set DATABASE_URL
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
