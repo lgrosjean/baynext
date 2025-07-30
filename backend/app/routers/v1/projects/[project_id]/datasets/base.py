@@ -13,7 +13,7 @@ from app.services import DatasetService
 
 logger = get_logger(__name__)
 
-router = APIRouter(tags=["Datasets"], prefix="/datasets")
+router = APIRouter(tags=["Dataset"], prefix="/datasets")
 
 
 @router.post(

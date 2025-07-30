@@ -8,7 +8,7 @@ from app.core.dependencies import CurrentUserDep, SessionDep
 from app.models.project import ProjectCreate, ProjectCreated, ProjectPublic
 from app.services import ProjectService
 
-router = APIRouter(tags=["Projects"], prefix="/projects")
+router = APIRouter(tags=["Project"], prefix="/projects")
 
 
 @router.get(

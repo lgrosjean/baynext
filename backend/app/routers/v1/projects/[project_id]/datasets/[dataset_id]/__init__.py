@@ -1,5 +1,9 @@
 """API router for specific dataset-related endpoints."""
 
-from .base import router
+from fastapi import APIRouter
 
-__all__ = ["router"]
+from .base import router as base_router
+
+router = APIRouter()
+# Include the base router for dataset management
+router.include_router(base_router)
