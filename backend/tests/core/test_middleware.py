@@ -14,7 +14,7 @@ from app.core.middleware import (
     _add_security_middleware,
     add_middleware,
 )
-from app.core.settings import Env
+from app.core.settings import Env, settings
 
 # Constants for status codes
 HTTP_200_OK = 200
@@ -61,10 +61,7 @@ class TestCORSMiddleware:
 
         assert cors_middleware is not None, "CORS middleware was not added to the app"
 
-        expected_origins = [
-            "https://yourdomain.com",
-            "https://www.yourdomain.com",
-        ]
+        expected_origins = settings.ALLOWED_ORIGINS
         actual_origins = cors_middleware.kwargs["allow_origins"]
 
         assert actual_origins == expected_origins, (
