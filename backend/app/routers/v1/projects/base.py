@@ -8,11 +8,11 @@ from app.core.dependencies import CurrentUserDep, SessionDep
 from app.models.project import ProjectCreate, ProjectCreated, ProjectPublic
 from app.services import ProjectService
 
-router = APIRouter(tags=["Project"], prefix="/projects")
+router = APIRouter(tags=["Project"])
 
 
 @router.get(
-    "",
+    "/",
     summary="List all projects a user is a member of",
     response_model_exclude_none=True,
     response_model_exclude_unset=True,
@@ -39,7 +39,7 @@ async def list_user_projects(
 
 
 @router.post(
-    "",
+    "/",
     status_code=201,
     summary="Create a new project",
 )

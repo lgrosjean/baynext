@@ -4,6 +4,7 @@ import datetime
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from fastapi import UploadFile
 from pydantic import Field as PydanticField
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -87,8 +88,10 @@ class Dataset(DatasetBase, UUIDMixin, TimestampMixin, table=True):
 class DatasetCreate(DatasetBase):
     """Dataset creation model for API requests."""
 
+    file: UploadFile
 
-class DatasetCreated(DatasetCreate):
+
+class DatasetCreated(DatasetBase):
     """Dataset created model for API responses."""
 
     id: str = PydanticField(
@@ -100,10 +103,30 @@ class DatasetCreated(DatasetCreate):
         alias="projectId",
         examples=[f"{uuid4()!s}"],
     )
+    blob_path: str = PydanticField(
+        description="Path to the dataset blob storage",
+        alias="blobPath",
+    )
+    created_by: str = PydanticField(
+        description="User ID of the dataset creator",
+        alias="createdBy",
+        examples=[f"{uuid4()!s}"],
+    )
 
     class Config:
+        """Pydantic configuration."""
+
         populate_by_name = True
         use_enum_values = True
+
+
+class DatasetPublic(DatasetCreated):
+    """Public dataset model for API responses (without sensitive data)."""
+
+    created_at: datetime.datetime = PydanticField(
+        description="Timestamp when the dataset was created",
+        alias="createdAt",
+    )
 
 
 class DatasetDetails(DatasetCreated):
@@ -137,5 +160,7 @@ class DatasetDetails(DatasetCreated):
     )
 
     class Config:
+        """Pydantic configuration."""
+
         populate_by_name = True
         use_enum_values = True

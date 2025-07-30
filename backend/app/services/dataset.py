@@ -1,8 +1,11 @@
 """Dataset service for managing dataset CRUD operations."""
 
+import os
+
 from sqlmodel import Session, desc, select
 
 from app.core.logging import get_logger
+from app.lib.gcp import upload_csv_to_blob
 from app.models.dataset import Dataset, DatasetCreate
 from app.models.project import Project
 
@@ -23,7 +26,7 @@ class DatasetService:
         self.session = session
         self.project_id = project_id
 
-    def create(self, dataset_data: DatasetCreate, user_id: str) -> Dataset:
+    async def create(self, dataset_data: DatasetCreate, user_id: str) -> Dataset:
         """Create a new dataset in the database.
 
         Args:
@@ -38,26 +41,34 @@ class DatasetService:
 
         """
         logger.info(
-            "Creating dataset for project %s by user %s with data: %s",
+            "Creating dataset for project %s by user %s",
             self.project_id,
             user_id,
-            dataset_data,
         )
-        blob_path = (
-            "gcs://path/to/dataset/blob"  # Placeholder for actual blob storage path
-        )
+
+        # Read file content directly into pandas
+        try:
+            blob_path = f"{self.project_id}/datasets/{dataset_data.file.filename}"
+            blob_name = await upload_csv_to_blob(dataset_data.file, blob_path=blob_path)
+        except ValueError as e:
+            logger.exception("Failed to read dataset file: %s", str(e))
+            raise
+
+        # Create database record
+        logger.info("Creating dataset record in database...")
         db_dataset = Dataset.model_validate(
             {
-                **dataset_data.model_dump(by_alias=True),
+                **dataset_data.model_dump(by_alias=True, exclude={"file"}),
                 "project_id": self.project_id,
                 "created_by": user_id,  # Set the creator ID from the current user
-                "blob_path": blob_path,
+                "blob_path": blob_name,  # Use the blob path from the upload
             },
         )
 
         self.session.add(db_dataset)
         self.session.commit()
         self.session.refresh(db_dataset)
+
         logger.info("🆕 Dataset %s created!", db_dataset.id)
         return db_dataset
 

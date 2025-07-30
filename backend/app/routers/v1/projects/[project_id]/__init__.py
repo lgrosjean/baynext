@@ -8,6 +8,9 @@ from fastapi import APIRouter
 from .base import router as base_router
 from .datasets import router as datasets_router
 
-router = APIRouter()
+router = APIRouter(prefix="/{project_id}")
 router.include_router(base_router)
 router.include_router(datasets_router)
+
+for route in router.routes:
+    route.path = route.path.rstrip("/")

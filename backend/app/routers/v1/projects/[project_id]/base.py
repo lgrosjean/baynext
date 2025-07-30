@@ -13,11 +13,11 @@ from app.models.membership import Membership
 from app.models.project import Project, ProjectDetails
 from app.services import ProjectService
 
-router = APIRouter(tags=["Project"], prefix="/{project_id}")
+router = APIRouter(tags=["Project"], prefix="")
 
 
 @router.get(
-    "",
+    "/",
     summary="Get a given project",
     response_model_exclude_none=True,
 )
@@ -32,7 +32,7 @@ async def get_project(
 
 
 @router.delete(
-    "",
+    "/",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a project",
 )

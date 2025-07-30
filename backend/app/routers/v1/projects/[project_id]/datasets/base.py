@@ -1,6 +1,8 @@
 """Datasets endpoints for managing datasets within a project."""
 
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, File, HTTPException, status
 
 from app.core.dependencies import (
     CurrentProjectMembershipDep,
@@ -8,35 +10,58 @@ from app.core.dependencies import (
     SessionDep,
 )
 from app.core.logging import get_logger
-from app.models.dataset import DatasetCreate, DatasetCreated
+from app.models.dataset import DatasetCreate, DatasetCreated, DatasetPublic
 from app.services import DatasetService
 
 logger = get_logger(__name__)
 
-router = APIRouter(tags=["Dataset"], prefix="/datasets")
+router = APIRouter(tags=["Dataset"])
 
 
 @router.post(
-    "",
+    "/",
     status_code=201,
     summary="Create a new dataset",
+    responses={
+        status.HTTP_201_CREATED: {
+            "description": "Dataset created successfully",
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error - Failed to create dataset",
+        },
+    },
 )
 async def create_dataset(
     current_user: CurrentUserDep,
     current_project_membership: CurrentProjectMembershipDep,
-    dataset_data: DatasetCreate,
+    dataset_data: Annotated[
+        DatasetCreate,
+        File(),
+    ],  # https://stackoverflow.com/a/79585735
     session: SessionDep,
 ) -> DatasetCreated:
-    """Create a new dataset for the current authenticated user."""
+    """Create a new dataset in the specified project.
+
+    You can obtain a `project_id` by listing the projects for your Baynext account.
+
+    """
     project, _ = current_project_membership
-    return DatasetService(session, project_id=project.id).create(
-        dataset_data,
-        user_id=current_user.id,
-    )
+
+    try:
+        return await DatasetService(session, project_id=project.id).create(
+            dataset_data,
+            user_id=current_user.id,
+        )
+    except Exception as e:
+        logger.exception("Failed to create dataset in project %s", project.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create dataset: {type(e).__name__} - {e!s}",
+        ) from e
 
 
 @router.get(
-    "",
+    "/",
     summary="List all datasets in the project",
     response_model_exclude_none=True,
     response_model_exclude_unset=True,
@@ -51,7 +76,7 @@ async def list_dataset_projects(
     session: SessionDep,
     limit: int | None = None,
     offset: int | None = None,
-) -> list[DatasetCreated]:
+) -> list[DatasetPublic]:
     """List datasets for the current authenticated user."""
     project, _ = current_project_membership
     try:
