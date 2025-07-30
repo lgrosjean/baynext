@@ -19,9 +19,47 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+_USER_AGENT = "Baynext CLI"
+
 ERROR_401_UNAUTHORIZED = "🔒 Unauthorized, please login again with `baynext auth login`"
 ERROR_403_FORBIDDEN = "⛔️ Forbidden"
 ERROR_404_NOT_FOUND = "❓ Not Found"
+
+
+class UnauthorizedError(httpx.HTTPStatusError):
+    """Custom exception for unauthorized access."""
+
+    def __init__(self, request: httpx.Request, response: httpx.Response) -> None:
+        """Initialize UnauthorizedError with a custom message."""
+        super().__init__(
+            message=ERROR_401_UNAUTHORIZED,
+            request=request,
+            response=response,
+        )
+
+
+class ForbiddenError(httpx.HTTPStatusError):
+    """Custom exception for forbidden access."""
+
+    def __init__(self, request: httpx.Request, response: httpx.Response) -> None:
+        """Initialize ForbiddenError with a custom message."""
+        super().__init__(
+            message=ERROR_403_FORBIDDEN,
+            request=request,
+            response=response,
+        )
+
+
+class NotFoundError(httpx.HTTPStatusError):
+    """Custom exception for not found errors."""
+
+    def __init__(self, request: httpx.Request, response: httpx.Response) -> None:
+        """Initialize NotFoundError with a custom message."""
+        super().__init__(
+            message=ERROR_404_NOT_FOUND,
+            request=request,
+            response=response,
+        )
 
 
 class APIClient:
@@ -38,21 +76,22 @@ class APIClient:
         headers = headers or {}
         if self._token:
             headers["Authorization"] = f"Bearer {self._token}"
+        headers["User-Agent"] = _USER_AGENT
         return headers
 
     def _handle_response(self, response: httpx.Response) -> dict[str, Any]:
         """Handle API response."""
         if response.status_code == httpx.codes.UNAUTHORIZED:
             logger.error("🔒 Unauthorized: %s", response.text)
-            response.raise_for_status()
+            raise UnauthorizedError(response.request, response)
 
         if response.status_code == httpx.codes.FORBIDDEN:
             logger.error(ERROR_403_FORBIDDEN)
-            response.raise_for_status()
+            raise ForbiddenError(response.request, response)
 
         if response.status_code == httpx.codes.NOT_FOUND:
             logger.error(ERROR_404_NOT_FOUND)
-            response.raise_for_status()
+            raise NotFoundError(response.request, response)
 
         if not response.is_success:
             error_data = (
@@ -139,6 +178,7 @@ class APIClient:
         """Get current user information."""
         return self._get("/me")
 
+    # Projects
     def list_projects(self) -> list[dict[str, Any]]:
         """List all projects."""
         return self._get("/projects")
@@ -155,3 +195,12 @@ class APIClient:
     def delete_project(self, project_id: str) -> dict[str, Any]:
         """Delete a project."""
         return self._delete(f"/projects/{project_id}")
+
+    # Datasets
+    def list_datasets(self, project_id: str) -> list[dict[str, Any]]:
+        """List datasets in a project."""
+        return self._get(f"/projects/{project_id}/datasets")
+
+    def get_dataset(self, project_id: str, dataset_id: str) -> dict[str, Any]:
+        """Get details of a specific dataset."""
+        return self._get(f"/projects/{project_id}/datasets/{dataset_id}")

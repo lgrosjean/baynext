@@ -9,7 +9,7 @@ from sqlmodel import Field
 class TimestampMixin:
     """Mixin for timestamp fields."""
 
-    created_at: datetime | None = Field(
+    created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         index=True,
     )

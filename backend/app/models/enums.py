@@ -17,3 +17,10 @@ class UserStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     PENDING = "pending"
+
+
+class KpiType(str, Enum):
+    """Enumeration for KPI types."""
+
+    REVENUE = "revenue"
+    NON_REVENUE = "non_revenue"

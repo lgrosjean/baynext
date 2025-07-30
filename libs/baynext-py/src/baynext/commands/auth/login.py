@@ -5,7 +5,7 @@ import getpass
 import typer
 
 from baynext.client import APIClient
-from baynext.config import get_config_value, get_token, save_token, set_config
+from baynext.config import get_config_value, save_token, set_config
 
 app = typer.Typer()
 
@@ -46,8 +46,6 @@ def login(
     ),
 ) -> None:
     """🔓 Login to your account and get an access token."""
-    client = APIClient()
-
     if username and password:
         email_or_username = username
     else:
@@ -65,7 +63,7 @@ def login(
 
             else:
                 try:
-                    client.me()
+                    APIClient().me()
                     typer.echo("✅ Already logged in with existing account!")
                     return
 
@@ -78,6 +76,7 @@ def login(
             email_or_username, password = _ask_username_and_password()
 
     try:
+        client = APIClient()
         response = client.get_token(email_or_username, password)
         save_token(response["access_token"])
         typer.echo("✅ Login successful!")

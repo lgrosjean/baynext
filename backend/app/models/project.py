@@ -11,6 +11,7 @@ from .membership import MembershipPublic
 from .user import UserPublic
 
 if TYPE_CHECKING:
+    from .dataset import Dataset
     from .membership import Membership
     from .user import User
 
@@ -28,7 +29,6 @@ class ProjectBase(SQLModel):
         min_length=PROJECT_NAME_MIN_LENGTH,
         index=True,
     )
-    description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH)
 
     @classmethod
     @field_validator("name")
@@ -48,19 +48,6 @@ class ProjectBase(SQLModel):
             raise name_too_long_error
         return v.strip()
 
-    @classmethod
-    @field_validator("description")
-    def validate_description(cls, v: str | None) -> str | None:
-        """Validate project description is not empty and has length constraints."""
-        description_too_long_error = ValueError(
-            f"Project description cannot exceed {DESCRIPTION_MAX_LENGTH} characters",
-        )
-        if v is not None and len(v.strip()) == 0:
-            return None
-        if v is not None and len(v.strip()) > DESCRIPTION_MAX_LENGTH:
-            raise description_too_long_error
-        return v.strip() if v else None
-
 
 class Project(ProjectBase, UUIDMixin, TimestampMixin, table=True):
     """Project model with SQLModel."""
@@ -73,6 +60,7 @@ class Project(ProjectBase, UUIDMixin, TimestampMixin, table=True):
     # Relationships
     owner: "User" = Relationship(back_populates="created_projects")
     members: list["Membership"] = Relationship(back_populates="project")
+    datasets: list["Dataset"] | None = Relationship(back_populates="project")
 
     class Config:
         """Pydantic configuration."""
@@ -83,6 +71,21 @@ class Project(ProjectBase, UUIDMixin, TimestampMixin, table=True):
 
 class ProjectCreate(ProjectBase):
     """Project creation model for API requests."""
+
+    description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH)
+
+    @classmethod
+    @field_validator("description")
+    def validate_description(cls, v: str | None) -> str | None:
+        """Validate project description is not empty and has length constraints."""
+        description_too_long_error = ValueError(
+            f"Project description cannot exceed {DESCRIPTION_MAX_LENGTH} characters",
+        )
+        if v is not None and len(v.strip()) == 0:
+            return None
+        if v is not None and len(v.strip()) > DESCRIPTION_MAX_LENGTH:
+            raise description_too_long_error
+        return v.strip() if v else None
 
 
 class ProjectCreated(ProjectBase):
@@ -105,7 +108,7 @@ class ProjectPublic(ProjectCreated):
         from_attributes = True
 
 
-class ProjectDetail(ProjectPublic):
+class ProjectDetails(ProjectPublic):
     """Detailed project model for API responses, including owner and members."""
 
     owner: UserPublic

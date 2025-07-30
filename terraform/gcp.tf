@@ -110,6 +110,8 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
   location = local.location
   project  = var.project_id
 
+  invoker_iam_disabled = true
+
   template {
     service_account = google_service_account.cloud_run_backend_sa.email
     containers {
@@ -135,12 +137,43 @@ resource "google_cloud_run_v2_service" "baynext_backend_service" {
         value = var.ml_api_secret_api_key
       }
 
+      env {
+        name  = "BUCKET_NAME"
+        value = google_storage_bucket.dataset_bucket.name
+      }
+
       ports {
         container_port = 80
       }
     }
   }
 
+  lifecycle {
+    ignore_changes = [
+      template[0].containers[0].image,
+      template[0].labels,
+    ]
+  }
 
+}
 
+# Create a Cloud Storage bucket for CSV dataset files
+resource "google_storage_bucket" "dataset_bucket" {
+  name     = "${var.project_id}-dataset-files"
+  location = local.location
+  project  = var.project_id
+}
+
+# Grant the backend service account admin access to upload and manage files in the dataset bucket
+resource "google_storage_bucket_iam_member" "backend_bucket_access" {
+  bucket = google_storage_bucket.dataset_bucket.name
+  role   = "roles/storage.objectAdmin"
+  member = google_service_account.cloud_run_backend_sa.member
+}
+
+# Grant the ML job service account access to the dataset bucket to download and process files
+resource "google_storage_bucket_iam_member" "ml_job_bucket_access" {
+  bucket = google_storage_bucket.dataset_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = google_service_account.cloud_run_job_sa.member
 }

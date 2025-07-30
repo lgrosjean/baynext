@@ -8,7 +8,7 @@ client = TestClient(app)
 
 
 def test_base_check():
-    response = client.get("/v1/")
+    response = client.get("/")
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()

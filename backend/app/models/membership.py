@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from .project import Project
     from .user import User
 
+from .user import UserPublic
+
 
 class Membership(SQLModel, UUIDMixin, table=True):
     """Project membership model."""
@@ -55,13 +57,8 @@ class Membership(SQLModel, UUIDMixin, table=True):
 class MembershipPublic(SQLModel):
     """Information about a project member for API responses."""
 
-    email: str
-    username: str
-    first_name: str | None = None
-    last_name: str | None = None
+    user: UserPublic
     role: UserRole
-    joined_at: datetime
-    is_active: bool
 
     class Config:
         """Pydantic configuration."""

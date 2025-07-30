@@ -17,14 +17,7 @@ if TYPE_CHECKING:
 
 def _add_cors_middleware(app: "FastAPI") -> None:
     """Add CORS middleware to the FastAPI application."""
-    cors_origins = (
-        ["*"]
-        if not settings.is_prod()
-        else [
-            "https://yourdomain.com",
-            "https://www.yourdomain.com",
-        ]
-    )
+    cors_origins = ["*"] if not settings.is_prod() else settings.ALLOWED_ORIGINS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,

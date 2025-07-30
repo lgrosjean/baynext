@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from baynext.client import APIClient, ForbiddenError, NotFoundError, UnauthorizedError
+from baynext.commands.utils import get_project_id_from_ctx
 from baynext.utils import OutputFormat, OutputOption
 
 app = typer.Typer()
@@ -16,16 +17,18 @@ app = typer.Typer()
 
 @app.command()
 def get(
-    project_id: Annotated[
+    ctx: typer.Context,
+    dataset_id: Annotated[
         str,
-        typer.Argument(..., help="ID of the project", show_default=False),
+        typer.Argument(..., help="ID of the dataset"),
     ],
     output: OutputOption = OutputFormat.TABLE,
 ) -> None:
-    """Get details of a project."""
+    """Get details of a dataset."""
+    project_id = get_project_id_from_ctx(ctx)
     try:
         client = APIClient()
-        response = client.get_project(project_id=project_id)
+        response = client.get_dataset(project_id=project_id, dataset_id=dataset_id)
 
         if output == OutputFormat.JSON:
             print_json(data=response)
@@ -36,12 +39,16 @@ def get(
             table = Table()
             table.add_column("Id")
             table.add_column("Name")
+            table.add_column("Blob URL")
+            table.add_column("Created By")
             table.add_column("Created At")
 
             table.add_row(
                 str(response["id"]),
-                response["name"],
-                response["created_at"],
+                response["displayName"],
+                response["blobPath"],
+                response["createdBy"]["username"],
+                response["createdAt"],
             )
 
             console.print(table)

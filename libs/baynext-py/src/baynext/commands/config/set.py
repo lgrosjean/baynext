@@ -1,6 +1,7 @@
 """`baynext config set` command."""
 
 import typer
+from rich import print as rprint
 
 from baynext.config import set_config
 from baynext.utils import PropertyArg
@@ -12,4 +13,4 @@ app = typer.Typer()
 def set(property_: PropertyArg, value: str) -> None:  # noqa: A001
     """Set the value of a specific Baynext CLI property."""
     set_config(property_, value)
-    typer.echo(f"✅ Property '{property_}' set to: {value}")
+    rprint(f"✅ Property [bold]{property_}[/bold] set to [bold]{value}[/bold]")

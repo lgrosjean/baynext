@@ -54,10 +54,12 @@ class Settings(BaseSettings):
     API_KEY_QUERY: str = "key"
     """Query parameter name for API key authentication."""
 
+    BUCKET_NAME: str
     # CORS - includes Vercel domains
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
         "https://baynext.tech",  # Your production domain
+        "https://www.baynext.tech",
     ]
 
     environment: Env = Env.development

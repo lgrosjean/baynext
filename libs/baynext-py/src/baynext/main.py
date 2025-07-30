@@ -3,7 +3,7 @@
 import typer
 
 from baynext import __version__
-from baynext.commands import auth, config, projects
+from baynext.commands import auth, config, datasets, projects
 
 app = typer.Typer(
     name="Baynext",
@@ -16,6 +16,7 @@ app = typer.Typer(
 app.add_typer(auth.app)
 app.add_typer(config.app)
 app.add_typer(projects.app)
+app.add_typer(datasets.app)
 
 
 @app.command()

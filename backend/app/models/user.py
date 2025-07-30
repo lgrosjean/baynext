@@ -10,15 +10,16 @@ from .base import TimestampMixin, UUIDMixin
 from .enums import UserStatus
 
 if TYPE_CHECKING:
+    from .dataset import Dataset
     from .membership import Membership
     from .project import Project
 
 
 class UserBase(SQLModel):
-    email: EmailStr
+    # email: EmailStr
     username: str
-    first_name: str
-    last_name: str
+    # first_name: str
+    # last_name: str
 
     @classmethod
     @field_validator("username")
@@ -51,6 +52,12 @@ class User(UserBase, UUIDMixin, TimestampMixin, table=True):
             "foreign_keys": "[Membership.user_id]",
         },
     )
+    datasets: list["Dataset"] | None = Relationship(
+        back_populates="creator",
+        sa_relationship_kwargs={
+            "foreign_keys": "[Dataset.created_by]",
+        },
+    )
 
     class Config:
         """Pydantic configuration."""
@@ -64,10 +71,26 @@ class UserPublic(UserBase):
 
     id: str
     status: UserStatus
-    created_at: datetime
-    last_login: datetime | None = None
 
     class Config:
         """Pydantic configuration."""
 
         from_attributes = True
+
+
+class UserDetails(UserBase):
+    """Detailed user model for API responses."""
+
+    email: EmailStr
+    username: str
+    first_name: str | None = None
+    last_name: str | None = None
+    last_login: datetime | None = None
+    created_at: datetime
+
+    class Config:
+        """Pydantic configuration."""
+
+        from_attributes = True
+        orm_mode = True
+        use_enum_values = True
