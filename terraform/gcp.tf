@@ -176,4 +176,3 @@ resource "google_storage_bucket_iam_member" "ml_job_bucket_access" {
   role   = "roles/storage.objectViewer"
   member = google_service_account.cloud_run_job_sa.member
 }
-
